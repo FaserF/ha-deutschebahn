@@ -1,12 +1,16 @@
 {
   "domain": "deutschebahn",
   "name": "Deutsche Bahn",
+  "codeowners": [
+    "@faserf"
+  ],
+  "config_flow": false,
   "documentation": "https://github.com/faserf/ha-deutschebahn#readme",
   "issue_tracker": "https://github.com/faserf/ha-deutschebahn/issues",
   "requirements": [
-    "schiene==0.23"
+    "schiene==0.24"
   ],
-  "codeowners": [],
+  "version": "1.0.0",
   "iot_class": "cloud_polling",
   "loggers": [
     "schiene"

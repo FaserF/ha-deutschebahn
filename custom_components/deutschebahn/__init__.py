@@ -1,1 +1,1 @@
-"""The deutsche_bahn component."""
+"""The deutschebahn component."""

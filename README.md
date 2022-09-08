@@ -12,16 +12,16 @@ I will not give much support on this integration! Use it as it is, this is the s
 
 Below is the old Homeassistant documentation taken from [here](https://github.com/home-assistant/home-assistant.io/blob/b38ab5e8bc745e8e751eb27c2c079de8a8e83d5e/source/_integrations/deutsche_bahn.markdown).
 ---
-title: Deutsche Bahn
-description: Instructions on how to integrate timetable data for traveling in Germany within Home Assistant.
-ha_category:
+- title: Deutsche Bahn
+- description: Instructions on how to integrate timetable data for traveling in Germany within Home Assistant.
+- ha_category:
   - Transport
-ha_iot_class: Cloud Polling
-ha_release: 0.14
-ha_domain: deutsche_bahn
-ha_platforms:
+- ha_iot_class: Cloud Polling
+- ha_release: 0.14
+- ha_domain: deutsche_bahn
+- ha_platforms:
   - sensor
-ha_integration_type: integration
+- ha_integration_type: integration
 ---
 
 The `deutsche_bahn` sensor will give you the departure time of the next train for the given connection. In case of a delay, the delay is also shown. Additional details are used to inform about, e.g., the type of the train, price, and if it is on time.
@@ -96,8 +96,6 @@ where `<config>` is your Home Assistant configuration directory.
 >__NOTE__: Do not download the file by using the link above directly. Rather, click on it, then on the page that comes up use the `Raw` button.
 
 ## Configuration
-
-Go to Configuration -> Integrations and click on "add integration". Then search for Deutsche Bahn
 
 ### Configuration Variables
 - **from**: Enter your Start location
