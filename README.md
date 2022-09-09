@@ -18,13 +18,9 @@ Old Homeassistant documentation can be found [here](https://github.com/home-assi
 ## Installation
 ### 1. Using HACS (recommended way)
 
-Open your HACS Settings and add
+This integration is a official HACS Integration.
 
-https://github.com/faserf/ha-deutschebahn
-
-as custom repository URL.
-
-Then install the "Deutsche Bahn" integration.
+Open HACS then install the "Deutsche Bahn" integration.
 
 If you use this method, your component will always update to the latest version.
 
