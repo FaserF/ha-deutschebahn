@@ -7,32 +7,26 @@ import logging
 import schiene
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
-from homeassistant.const import CONF_OFFSET
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 import homeassistant.util.dt as dt_util
 
-CONF_DESTINATION = "to"
-CONF_START = "from"
-DEFAULT_OFFSET = timedelta(minutes=0)
-CONF_ONLY_DIRECT = "only_direct"
-DEFAULT_ONLY_DIRECT = False
+from .const import (
+    DOMAIN,
+    ATTRIBUTION,
+
+    CONF_DESTINATION,
+    CONF_START,
+    CONF_ONLY_DIRECT,
+    CONF_OFFSET,
+)
 
 ICON = "mdi:train"
 
 SCAN_INTERVAL = timedelta(minutes=2)
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_DESTINATION): cv.string,
-        vol.Required(CONF_START): cv.string,
-        vol.Optional(CONF_OFFSET, default=DEFAULT_OFFSET): cv.time_period,
-        vol.Optional(CONF_ONLY_DIRECT, default=DEFAULT_ONLY_DIRECT): cv.boolean,
-    }
-)
 
 _LOGGER = logging.getLogger(__name__)
 

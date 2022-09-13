@@ -1,6 +1,6 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 # Deutsche Bahn Homeassistant Sensor
-The `deutsche_bahn` sensor will give you the departure time of the next train for the given connection. In case of a delay, the delay is also shown. Additional details are used to inform about, e.g., the type of the train, price, and if it is on time.
+The `deutschebahn` sensor will give you the departure time of the next train for the given connection. In case of a delay, the delay is also shown. Additional details are used to inform about, e.g., the type of the train, price, and if it is on time.
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Db-bahn.svg/1280px-Db-bahn.svg.png" alt="Deutsche Bahn" width="300px">
 
