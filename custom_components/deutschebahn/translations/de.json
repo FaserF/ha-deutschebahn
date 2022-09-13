@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Enter the DB station informations to set up the sensor",
+        "data": {
+          "start": "Latitude",
+          "destination": "Longitude",
+          "offset": "Distance in kilometers (km)",
+          "only_direct": "E-Mail Adress from your foodsharing account"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect",
+      "unknown": "Unknown Error"
+    },
+    "abort": {
+      "already_configured": "This start & destination combination is already configured"
+    }
+  }
+}

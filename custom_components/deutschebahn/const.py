@@ -8,3 +8,6 @@ CONF_DESTINATION = "to"
 CONF_START = "from"
 CONF_OFFSET = "offset"
 CONF_ONLY_DIRECT = "only_direct"
+
+DEFAULT_OFFSET = timedelta(minutes=0)
+DEFAULT_ONLY_DIRECT = False

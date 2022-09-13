@@ -2,21 +2,24 @@
   "config": {
     "step": {
       "user": {
-        "description": "Enter the DB station informations to set up the sensor",
+        "description": "The latitude and longitude coordinates will be used to search for baskets within your distance. Your username and password will be used to authentificate API.",
         "data": {
-          "start": "Latitude",
-          "destination": "Longitude",
-          "offset": "Distance in kilometers (km)",
-          "only_direct": "E-Mail Adress from your foodsharing account"
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "distance": "Distance in kilometers (km)",
+          "email": "E-Mail Adress from your foodsharing account",
+          "password": "Password from your foodsharing account",
+          "scan_interval": "Scan interval in minutes"
         }
       }
     },
     "error": {
       "cannot_connect": "Cannot connect",
+      "invalid_lat_long": "Invalid Langitude / Longitude coordinates",
       "unknown": "Unknown Error"
     },
     "abort": {
-      "already_configured": "This start & destination combination is already configured"
+      "already_configured": "This latitude & longitude combination is already configured"
     }
   }
 }

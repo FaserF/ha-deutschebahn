@@ -4,6 +4,7 @@ import logging
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.const import CONF_NAME, CONF_LATITUDE, CONF_LONGITUDE
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
@@ -12,6 +13,9 @@ from .const import (  # pylint: disable=unused-import
     CONF_START,
     CONF_OFFSET,
     CONF_ONLY_DIRECT,
+
+    DEFAULT_OFFSET,
+    DEFAULT_ONLY_DIRECT,
 )
 DOMAIN = "deutschebahn"
 
@@ -29,10 +33,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            SENSORNAME = user_input[CONF_START] + to + user_input[CONF_DESTINATION]
-            await self.async_set_unique_id(SENSORNAME)
+            await self.async_set_unique_id(user_input[CONF_LATITUDE_FS])
             self._abort_if_unique_id_configured()
-            return self.async_create_entry(title=SENSORNAME, data=user_input)
+            return self.async_create_entry(title=user_input[CONF_LATITUDE_FS], data=user_input)
 
             _LOGGER.debug(
                 "Initialized new DeutscheBahn Sensor with id: {unique_id}"
@@ -40,10 +43,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_START): cv.string,
                 vol.Required(CONF_DESTINATION): cv.string,
-                vol.Optional(CONF_OFFSET, default="0"): cv.positive_int,
-                vol.Optional(CONF_ONLY_DIRECT, default="False"): cv.boolean,
+                vol.Required(CONF_START): cv.string,
+                vol.Optional(CONF_OFFSET, default=DEFAULT_OFFSET): cv.time_period,
+                vol.Optional(CONF_ONLY_DIRECT, default=DEFAULT_ONLY_DIRECT): cv.boolean,
             },
         )
 

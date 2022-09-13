@@ -7,49 +7,69 @@ import logging
 import schiene
 import voluptuous as vol
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
+from homeassistant.const import CONF_OFFSET
 from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant import config_entries, core
+from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 import homeassistant.util.dt as dt_util
 
-from .const import (
-    DOMAIN,
-    ATTRIBUTION,
+from typing import Any, Callable, Dict, Optional
 
-    CONF_DESTINATION,
-    CONF_START,
-    CONF_ONLY_DIRECT,
-    CONF_OFFSET,
+import async_timeout
+
+from .const import (
+    ATTRIBUTION,
+    CONF_EMAIL,
+    CONF_PASSWORD,
+    CONF_LATITUDE_FS,
+    CONF_LONGITUDE_FS,
+    CONF_DISTANCE,
+    ATTR_BASKETS,
+    ATTR_ID,
+    ATTR_DESCRIPTION,
+    ATTR_UNTIL,
+    ATTR_PICTURE,
+    ATTR_ADDRESS,
+    ATTR_MAPS_LINK,
+
+    DOMAIN,
 )
 
 ICON = "mdi:train"
-
 SCAN_INTERVAL = timedelta(minutes=2)
-
 _LOGGER = logging.getLogger(__name__)
 
-
-def setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the Deutsche Bahn Sensor."""
-    start = config.get(CONF_START)
-    destination = config[CONF_DESTINATION]
-    offset = config[CONF_OFFSET]
-    only_direct = config[CONF_ONLY_DIRECT]
-    add_entities([DeutscheBahnSensor(start, destination, offset, only_direct)], True)
-
+async def async_setup_entry(
+    hass: HomeAssistantType, entry: ConfigType, async_add_entities
+):
+    """Setup sensors from a config entry created in the integrations UI."""
+    config = hass.data[DOMAIN][entry.entry_id]
+    _LOGGER.debug("Sensor async_setup_entry")
+    if entry.options:
+        config.update(entry.options)
+    sensors = FoodsharingSensor(config, hass)
+    async_add_entities(sensors, update_before_add=True)
+    async_add_entities(
+        [
+            DeutscheBahnSensor(config, hass)
+        ],
+        update_before_add=True
+    )
 
 class DeutscheBahnSensor(SensorEntity):
     """Implementation of a Deutsche Bahn sensor."""
 
-    def __init__(self, start, goal, offset, only_direct):
+    def __init__(self, config):
         """Initialize the sensor."""
+        start = config[CONF_START]
+        destination = config[CONF_DESTINATION]
+        offset = config[CONF_OFFSET]
+        only_direct = config[CONF_ONLY_DIRECT]
+
         self._name = f"{start} to {goal}"
         self.data = SchieneData(start, goal, offset, only_direct)
         self._state = None
