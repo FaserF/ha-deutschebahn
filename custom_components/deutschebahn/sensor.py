@@ -1,64 +1,72 @@
-"""Support for information about the German train system."""
-from __future__ import annotations
-
-from datetime import timedelta
+"""deutschebahn sensor platform."""
+from datetime import timedelta, datetime
 import logging
 
 import schiene
+from typing import Any, Callable, Dict, Optional
+import async_timeout
+
+from homeassistant import config_entries, core
+from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
+from homeassistant.const import ATTR_ATTRIBUTION
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.typing import (
+    ConfigType,
+    HomeAssistantType,
+    DiscoveryInfoType,
+)
+import homeassistant.util.dt as dt_util
 import voluptuous as vol
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
-from homeassistant.const import CONF_OFFSET
-from homeassistant.core import HomeAssistant
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-import homeassistant.util.dt as dt_util
+from .const import (
+    ATTRIBUTION,
+    CONF_DESTINATION,
+    CONF_START,
+    CONF_OFFSET,
+    CONF_ONLY_DIRECT,
+    ATTR_DATA,
 
-CONF_DESTINATION = "to"
-CONF_START = "from"
-DEFAULT_OFFSET = timedelta(minutes=0)
-CONF_ONLY_DIRECT = "only_direct"
-DEFAULT_ONLY_DIRECT = False
-
-ICON = "mdi:train"
-
-SCAN_INTERVAL = timedelta(minutes=2)
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_DESTINATION): cv.string,
-        vol.Required(CONF_START): cv.string,
-        vol.Optional(CONF_OFFSET, default=DEFAULT_OFFSET): cv.time_period,
-        vol.Optional(CONF_ONLY_DIRECT, default=DEFAULT_ONLY_DIRECT): cv.boolean,
-    }
+    DOMAIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
+SCAN_INTERVAL = timedelta(minutes=2)
 
-
-def setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the Deutsche Bahn Sensor."""
-    start = config.get(CONF_START)
-    destination = config[CONF_DESTINATION]
-    offset = config[CONF_OFFSET]
-    only_direct = config[CONF_ONLY_DIRECT]
-    add_entities([DeutscheBahnSensor(start, destination, offset, only_direct)], True)
-
+async def async_setup_entry(
+    hass: HomeAssistantType, entry: ConfigType, async_add_entities
+):
+    """Setup sensors from a config entry created in the integrations UI."""
+    config = hass.data[DOMAIN][entry.entry_id]
+    _LOGGER.debug("Sensor async_setup_entry")
+    if entry.options:
+        config.update(entry.options)
+    sensors = DeutscheBahnSensor(config, hass)
+    async_add_entities(sensors, update_before_add=True)
+    async_add_entities(
+        [
+            DeutscheBahnSensor(config, hass)
+        ],
+        update_before_add=True
+    )
 
 class DeutscheBahnSensor(SensorEntity):
     """Implementation of a Deutsche Bahn sensor."""
 
-    def __init__(self, start, goal, offset, only_direct):
-        """Initialize the sensor."""
-        self._name = f"{start} to {goal}"
-        self.data = SchieneData(start, goal, offset, only_direct)
+    def __init__(self, config, hass: HomeAssistantType):
+        super().__init__()
+        self._name = f"{config[CONF_START]} to {config[CONF_DESTINATION]}"
         self._state = None
+        self.data = None
+        self._available = True
+        self.hass = hass
+        self.updated = datetime.now()
+        self.start = config[CONF_START]
+        self.goal = config[CONF_DESTINATION]
+        self.offset = timedelta(seconds=config[CONF_OFFSET])
+        self.only_direct = config[CONF_ONLY_DIRECT]
+        self.schiene = schiene.Schiene()
+        self.connections = [{}]
 
     @property
     def name(self):
@@ -68,7 +76,14 @@ class DeutscheBahnSensor(SensorEntity):
     @property
     def icon(self):
         """Return the icon for the frontend."""
-        return ICON
+        return "mdi:train"
+
+    @property
+    def state(self) -> Optional[str]:
+        if self._state is not None:
+            return self._state
+        else:
+            return "Error"
 
     @property
     def native_value(self):
@@ -78,51 +93,61 @@ class DeutscheBahnSensor(SensorEntity):
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        connections = self.data.connections[0]
-        if len(self.data.connections) > 1:
-            connections["next"] = self.data.connections[1]["departure"]
-        if len(self.data.connections) > 2:
-            connections["next_on"] = self.data.connections[2]["departure"]
+        if len(self.connections) > 0:
+            connections = self.connections[0]
+            if len(self.connections) > 1:
+                connections["next"] = self.connections[1]["departure"]
+            if len(self.connections) > 2:
+                connections["next_on"] = self.connections[2]["departure"]
+        else: 
+            connections = None
         return connections
 
-    def update(self) -> None:
-        """Get the latest delay from bahn.de and updates the state."""
-        self.data.update()
-        self._state = self.data.connections[0].get("departure", "Unknown")
-        if self.data.connections[0].get("delay", 0) != 0:
-            self._state += f" + {self.data.connections[0]['delay']}"
+    async def async_update(self):
+        try:
+            with async_timeout.timeout(30):
+                hass = self.hass
+                """Pull data from the bahn.de web page."""
+                _LOGGER.debug("Update the connection data")
+                self.connections = await hass.async_add_executor_job(
+                        fetch_schiene_connections, hass, self
+                    )
 
+                if not self.connections:
+                    self.connections = [{}]
+                    self._available = True
+                else: 
+                    _LOGGER.exception(f"Data from DB for direction: '{self.start}' '{self.goal}' was empty, retrying at next sync run. Maybe also check if you have spelled your start and destination correct?")
+                    self._available = False
+    
+                for con in self.connections:
+                    # Detail info is not useful. Having a more consistent interface
+                    # simplifies usage of template sensors.
+                    if "details" in con:
+                        _LOGGER.debug("Got data from DB: {con}")
+                        con.pop("details")
+                        delay = con.get("delay", {"delay_departure": 0, "delay_arrival": 0})
+                        con["delay"] = delay["delay_departure"]
+                        con["delay_arrival"] = delay["delay_arrival"]
+                        con["ontime"] = con.get("ontime", False)
+                        self.attrs[ATTR_DATA] = self.connections
+                        self.attrs[ATTR_ATTRIBUTION] = f"last updated {datetime.now()} \n{ATTRIBUTION}"
 
-class SchieneData:
-    """Pull data from the bahn.de web page."""
+                if self.connections[0].get("delay", 0) != 0:
+                    self._state += f" + {self.connections[0]['delay']}"
+                else: 
+                    self._state = self.connections[0].get("departure", "Unknown")
+                    
+        except:
+            self._available = False
+            _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}'")
 
-    def __init__(self, start, goal, offset, only_direct):
-        """Initialize the sensor."""
-        self.start = start
-        self.goal = goal
-        self.offset = offset
-        self.only_direct = only_direct
-        self.schiene = schiene.Schiene()
-        self.connections = [{}]
-
-    def update(self):
-        """Update the connection data."""
-        self.connections = self.schiene.connections(
-            self.start,
-            self.goal,
-            dt_util.as_local(dt_util.utcnow() + self.offset),
-            self.only_direct,
-        )
-
-        if not self.connections:
-            self.connections = [{}]
-
-        for con in self.connections:
-            # Detail info is not useful. Having a more consistent interface
-            # simplifies usage of template sensors.
-            if "details" in con:
-                con.pop("details")
-                delay = con.get("delay", {"delay_departure": 0, "delay_arrival": 0})
-                con["delay"] = delay["delay_departure"]
-                con["delay_arrival"] = delay["delay_arrival"]
-                con["ontime"] = con.get("ontime", False)
+def fetch_schiene_connections(hass, self):
+    _LOGGER.debug("Fetching update from schiene python module")
+    data = self.schiene.connections(
+        self.start,
+        self.goal,
+        dt_util.as_local(dt_util.utcnow() + self.offset),
+        self.only_direct,
+    )
+    return data

@@ -4,7 +4,7 @@
   "codeowners": [
     "@faserf"
   ],
-  "config_flow": false,
+  "config_flow": true,
   "documentation": "https://github.com/faserf/ha-deutschebahn#readme",
   "issue_tracker": "https://github.com/faserf/ha-deutschebahn/issues",
   "requirements": [
