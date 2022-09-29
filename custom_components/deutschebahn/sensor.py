@@ -1,9 +1,9 @@
 """deutschebahn sensor platform."""
 from datetime import timedelta, datetime
 import logging
+from typing import Any, Callable, Dict, Optional
 
 import schiene
-from typing import Any, Callable, Dict, Optional
 import async_timeout
 
 from homeassistant import config_entries, core
@@ -57,7 +57,6 @@ class DeutscheBahnSensor(SensorEntity):
         super().__init__()
         self._name = f"{config[CONF_START]} to {config[CONF_DESTINATION]}"
         self._state = None
-        self.data = None
         self._available = True
         self.hass = hass
         self.updated = datetime.now()
@@ -116,27 +115,29 @@ class DeutscheBahnSensor(SensorEntity):
                 if not self.connections:
                     self.connections = [{}]
                     self._available = True
+                connections_count = len(self.connections)
+
+                if connections_count > 0:
+                    for con in self.connections:
+                        # Detail info is not useful. Having a more consistent interface
+                        # simplifies usage of template sensors.
+                        if "details" in con:
+                            #_LOGGER.debug(f"Processing connection: {con}")
+                            con.pop("details")
+                            delay = con.get("delay", {"delay_departure": 0, "delay_arrival": 0})
+                            con["delay"] = delay["delay_departure"]
+                            con["delay_arrival"] = delay["delay_arrival"]
+                            con["ontime"] = con.get("ontime", False)
+                            #self.attrs[ATTR_DATA] = self.connections
+                            #self.attrs[ATTR_ATTRIBUTION] = f"last updated {datetime.now()} \n{ATTRIBUTION}"
+
+                    if self.connections[0].get("delay", 0) != 0:
+                        self._state += f"{self.connections[0]['delay']}"
+                    else: 
+                        self._state = self.connections[0].get("departure", "Unknown")
                 else: 
                     _LOGGER.exception(f"Data from DB for direction: '{self.start}' '{self.goal}' was empty, retrying at next sync run. Maybe also check if you have spelled your start and destination correct?")
                     self._available = False
-    
-                for con in self.connections:
-                    # Detail info is not useful. Having a more consistent interface
-                    # simplifies usage of template sensors.
-                    if "details" in con:
-                        _LOGGER.debug("Got data from DB: {con}")
-                        con.pop("details")
-                        delay = con.get("delay", {"delay_departure": 0, "delay_arrival": 0})
-                        con["delay"] = delay["delay_departure"]
-                        con["delay_arrival"] = delay["delay_arrival"]
-                        con["ontime"] = con.get("ontime", False)
-                        self.attrs[ATTR_DATA] = self.connections
-                        self.attrs[ATTR_ATTRIBUTION] = f"last updated {datetime.now()} \n{ATTRIBUTION}"
-
-                if self.connections[0].get("delay", 0) != 0:
-                    self._state += f" + {self.connections[0]['delay']}"
-                else: 
-                    self._state = self.connections[0].get("departure", "Unknown")
                     
         except:
             self._available = False
@@ -150,4 +151,5 @@ def fetch_schiene_connections(hass, self):
         dt_util.as_local(dt_util.utcnow() + self.offset),
         self.only_direct,
     )
+    _LOGGER.debug(f"Fetched data: {data}")
     return data

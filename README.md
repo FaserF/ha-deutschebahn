@@ -37,12 +37,16 @@ where `<config>` is your Home Assistant configuration directory.
 >__NOTE__: Do not download the file by using the link above directly, the status in the "master" branch can be in development and therefore is maybe not working.
 
 ## Configuration
+Go to Configuration -> Integrations and click on "add integration". Then search for Rewe.
 
 ### Configuration Variables
 - **from**: The name of the start station.
 - **to**: The name of the end/destination station.
 - **offset** (optional): Do not display departures leaving sooner than this number of seconds. Useful if you are a couple of minutes away from the stop. The formats "HH:MM" and "HH:MM:SS" are also supported.
 - **only_direct** (optional - default is false): Only show direct connections.
+
+### YAML Config
+DEPRECATED, use the GUI setup instead!
 
 ```yaml
 # Example configuration.yaml entry
