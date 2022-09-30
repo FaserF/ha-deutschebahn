@@ -9,7 +9,9 @@ The `deutschebahn` sensor will give you the departure time of the next train for
 
 The official Deutsche Bahn Homeassistant integration got removed with release 2022.11 - therefore this custom integration exists. It got removed due to cloud scraping, but still was fully functional.
 
-I will not give much support on this integration, only keeping the dependencys up to date! Use it as it is, this is the same part as of release 2022.09 from HA, see [here](https://github.com/home-assistant/core/tree/c741d9d0452970c39397deca1c65766c8cb917da/homeassistant/components/deutsche_bahn).
+Please note that I will only give limited support on this integration
+
+This integration is based on the formerly officia HA DB integration, see [here](https://github.com/home-assistant/core/tree/c741d9d0452970c39397deca1c65766c8cb917da/homeassistant/components/deutsche_bahn).
 
 This sensor stores a lot of attributes which can be accessed by other sensors, e.g., a [template sensor](https://www.home-assistant.io/integrations/template/).
 
@@ -35,12 +37,16 @@ where `<config>` is your Home Assistant configuration directory.
 >__NOTE__: Do not download the file by using the link above directly, the status in the "master" branch can be in development and therefore is maybe not working.
 
 ## Configuration
+Go to Configuration -> Integrations and click on "add integration". Then search for Rewe.
 
 ### Configuration Variables
 - **from**: The name of the start station.
 - **to**: The name of the end/destination station.
 - **offset** (optional): Do not display departures leaving sooner than this number of seconds. Useful if you are a couple of minutes away from the stop. The formats "HH:MM" and "HH:MM:SS" are also supported.
 - **only_direct** (optional - default is false): Only show direct connections.
+
+### YAML Config
+DEPRECATED, use the GUI setup instead!
 
 ```yaml
 # Example configuration.yaml entry
@@ -75,5 +81,6 @@ logger:
 
 ## Thanks to
 Huge thanks to [@homeassistant](https://github.com/home-assistant/core/tree/c741d9d0452970c39397deca1c65766c8cb917da/homeassistant/components/deutsche_bahn) for the official old integration, where this one is based on!
+Also to [@kennell](https://github.com/kennell/schiene) for the schiene python library that this integration is using.
 
 The data is coming from the [bahn.de](https://www.bahn.de/p/view/index.shtml) website.

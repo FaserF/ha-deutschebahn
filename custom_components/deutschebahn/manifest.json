@@ -4,13 +4,13 @@
   "codeowners": [
     "@faserf"
   ],
-  "config_flow": false,
+  "config_flow": true,
   "documentation": "https://github.com/faserf/ha-deutschebahn#readme",
   "issue_tracker": "https://github.com/faserf/ha-deutschebahn/issues",
   "requirements": [
     "schiene==0.26"
   ],
-  "version": "1.0.2",
+  "version": "2.0.0",
   "iot_class": "cloud_polling",
   "loggers": [
     "schiene"
