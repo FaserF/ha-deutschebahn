@@ -8,7 +8,7 @@
   "documentation": "https://github.com/faserf/ha-deutschebahn#readme",
   "issue_tracker": "https://github.com/faserf/ha-deutschebahn/issues",
   "requirements": [
-    "schiene==0.25"
+    "schiene==0.26"
   ],
   "version": "1.0.2",
   "iot_class": "cloud_polling",
