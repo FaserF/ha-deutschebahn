@@ -30,9 +30,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            await self.async_set_unique_id(user_input[CONF_START] + "-" + user_input[CONF_DESTINATION])
+            await self.async_set_unique_id(user_input[CONF_START])
             self._abort_if_unique_id_configured()
-            return self.async_create_entry(title=user_input[CONF_START], data=user_input)
+            return self.async_create_entry(title=user_input[CONF_START] + "-" + user_input[CONF_DESTINATION], data=user_input)
 
             _LOGGER.debug(
                 "Initialized new deutschebahn with id: {unique_id}"

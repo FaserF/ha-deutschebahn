@@ -132,7 +132,7 @@ class DeutscheBahnSensor(SensorEntity):
                             #self.attrs[ATTR_ATTRIBUTION] = f"last updated {datetime.now()} \n{ATTRIBUTION}"
 
                     if self.connections[0].get("delay", 0) != 0:
-                        self._state += f"{self.connections[0]['delay']}"
+                        self._state = f"{self.connections[0]['delay']}"
                     else: 
                         self._state = self.connections[0].get("departure", "Unknown")
                 else: 
