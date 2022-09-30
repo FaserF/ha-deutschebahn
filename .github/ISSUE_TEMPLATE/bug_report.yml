@@ -31,11 +31,14 @@ body:
 
         [![Open your Home Assistant instance and show your Home Assistant version information.](https://my.home-assistant.io/badges/info.svg)](https://my.home-assistant.io/redirect/info/)
   - type: input
+    id: version_integration
+    validations:
+      required: true
     attributes:
-      label: What was the last working version of Home Assistant Core?
-      placeholder: core-
+      label: What version of DeutscheBahn Integration has the issue?
+      placeholder: 
       description: >
-        If known, otherwise leave blank.
+        The version from the release page you are using. Latest version can be found here: https://github.com/FaserF/ha-deutschebahn/releases/latest
   - type: dropdown
     validations:
       required: true

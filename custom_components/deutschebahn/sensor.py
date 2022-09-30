@@ -107,7 +107,7 @@ class DeutscheBahnSensor(SensorEntity):
             with async_timeout.timeout(30):
                 hass = self.hass
                 """Pull data from the bahn.de web page."""
-                _LOGGER.debug("Update the connection data")
+                _LOGGER.debug(f"Update the connection data for '{self.start}' '{self.goal}'")
                 self.connections = await hass.async_add_executor_job(
                         fetch_schiene_connections, hass, self
                     )
@@ -144,7 +144,7 @@ class DeutscheBahnSensor(SensorEntity):
             _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}'")
 
 def fetch_schiene_connections(hass, self):
-    _LOGGER.debug("Fetching update from schiene python module")
+    _LOGGER.debug(f"Fetching update from schiene python module for '{self.start}' '{self.goal}'")
     data = self.schiene.connections(
         self.start,
         self.goal,
