@@ -67,7 +67,7 @@ body:
   - type: textarea
     attributes:
       label: Anything in the logs that might be useful for us?
-      description: For example, error message, or stack traces.
+      description: Please enable debugging for this integration and paste the log output here. See https://github.com/FaserF/ha-deutschebahn#bug-reporting
       render: txt
   - type: textarea
     attributes:

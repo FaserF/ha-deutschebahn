@@ -67,17 +67,17 @@ sensor:
 ```
 
 ## Bug reporting
-Open an issue over at [github issues](https://github.com/FaserF/ha-deutschebahn/issues). Please prefer sending over a log with debugging enabled.
-
-Please note that I will only give limited support, as this integration was written by the HA devs and not by me!
+Open an issue over at [github issues](https://github.com/FaserF/ha-foodsharing/issues). Please prefer sending over a log with debugging enabled.
 
 To enable debugging enter the following in your configuration.yaml
 
 ```yaml
 logger:
     logs:
-        custom_components.deutschebahn: debug
+        custom_components.foodsharing: debug
 ```
+
+You can then find the log in the HA settings -> System -> Logs -> Enter "foodsharing" in the search bar -> "Load full logs"
 
 ## Thanks to
 Huge thanks to [@homeassistant](https://github.com/home-assistant/core/tree/c741d9d0452970c39397deca1c65766c8cb917da/homeassistant/components/deutsche_bahn) for the official old integration, where this one is based on!
