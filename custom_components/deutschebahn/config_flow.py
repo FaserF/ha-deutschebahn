@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow"""
 
-    VERSION = 1
+    VERSION = 2
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     async def async_step_user(self, user_input=None):
@@ -40,8 +40,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_START): str,
-                vol.Required(CONF_DESTINATION): str,
+                vol.Required(CONF_START, default="Start"): str,
+                vol.Required(CONF_DESTINATION, default="Destination"): str,
                 vol.Required(CONF_OFFSET, default=0): cv.positive_int,
                 vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
             },
@@ -66,32 +66,3 @@ def validate_options(user_input, errors):
         except vol.Invalid:
             _LOGGER.exception("Configuration option %s=%s is incorrect", key, value)
             errors["base"] = "option_error"
-
-
-class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle a option flow"""
-
-    def __init__(self, config_entry: config_entries.ConfigEntry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
-    async def async_step_init(self, user_input=None):
-        """Handle options flow."""
-        conf = self.config_entry
-        if conf.source == config_entries.SOURCE_IMPORT:
-            return self.async_show_form(step_id="init", data_schema=None)
-        errors = {}
-        if user_input is not None:
-            validate_options(user_input, errors)
-            if not errors:
-                return self.async_create_entry(title="", data=user_input)
-
-        options_schema = {}
-        for name, default, validation in VALIDATION_TUPLES:
-            key = vol.Optional(name, default=conf.options.get(name, default))
-            value = to_replace.get(name, validation)
-            options_schema[key] = value
-
-        return self.async_show_form(
-            step_id="init", data_schema=vol.Schema(options_schema), errors=errors
-        )

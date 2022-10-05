@@ -54,7 +54,6 @@ async def async_setup_entry(
 
     return True
 
-
 async def options_update_listener(
     hass: core.HomeAssistant, config_entry: config_entries.ConfigEntry
 ):
