@@ -1,0 +1,28 @@
+{
+  "config": {
+    "error": {
+      "invalid_station": "Ungültige Start/Ziel Station",
+      "unknown": "Unbekannter Fehler"
+    },
+    "abort": {
+      "already_configured": "Diese Start & Ziel Station Kombination ist bereits konfiguriert."
+    },
+    "step": {
+      "user": {
+        "title": "Einrichtung der DeutscheBahn Integration",
+        "description": "Trage hier deine Zug Station Informationen ein für die Suchabfrage.",
+        "data": {
+          "start": "Start Station",
+          "destination": "Ziel Station",
+          "offset": "Versatz in Minutes",
+          "only direct": "Zeige nur direkte Verbindungen?"
+        }
+      }
+    }
+  },
+  "system_health": {
+    "info": {
+      "version": "Version"
+    }
+  }
+}

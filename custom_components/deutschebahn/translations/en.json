@@ -1,0 +1,28 @@
+{
+  "config": {
+    "error": {
+      "invalid_station": "Invalid Start / Destination station",
+      "unknown": "Unknown Error"
+    },
+    "abort": {
+      "already_configured": "This start & Destination combination is already configured"
+    },
+    "step": {
+      "user": {
+        "title": "Setup DeutscheBahn",
+        "description": "Submit your train station details for the search queries.",
+        "data": {
+          "start": "Start station",
+          "destination": "Destination station",
+          "offset": "Offset in minutes",
+          "only direct": "Only show direct connections?"
+        }
+      }
+    }
+  },
+  "system_health": {
+    "info": {
+      "version": "Version"
+    }
+  }
+}

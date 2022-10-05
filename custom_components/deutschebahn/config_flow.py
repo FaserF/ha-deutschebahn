@@ -50,19 +50,3 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=data_schema, errors=errors
         )
-
-
-def validate_options(user_input, errors):
-    """Validate the options in the OptionsFlow.
-    This is an extra validation step because the validators
-    in `EXTRA_VALIDATION` cannot be serialized to json.
-    """
-    for key, (validate, _) in EXTRA_VALIDATION.items():
-        # these are unserializable validators
-        value = user_input.get(key)
-        try:
-            if value is not None and value != NONE_STR:
-                validate(value)
-        except vol.Invalid:
-            _LOGGER.exception("Configuration option %s=%s is incorrect", key, value)
-            errors["base"] = "option_error"
