@@ -1,13 +1,15 @@
 {
   "config": {
+    "flow_title": "{name}",
     "step": {
       "user": {
+        "title": "Setup DeutscheBahn",
         "description": "Submit your train station details for the search queries.",
         "data": {
           "start": "Start station",
           "destination": "Destination station",
           "offset": "Offset in minutes",
-          "only_direct": "Only show direct connections?"
+          "only direct": "Only show direct connections?"
         }
       }
     },

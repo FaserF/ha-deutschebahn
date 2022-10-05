@@ -36,7 +36,15 @@ where `<config>` is your Home Assistant configuration directory.
 
 >__NOTE__: Do not download the file by using the link above directly, the status in the "master" branch can be in development and therefore is maybe not working.
 
+### Migrate from the old official HA integration or from this V1.X to this 2.X Version
+1. Remove any deutschebahn (or deutsche_bahn) configuration from your configuration.yaml file
+2. Update the Integration to the latest release
+3. Restart Homeassistant
+4. Set up the integration from the UI
+
 ## Configuration
+Only valid for Version 2.X:
+
 Go to Configuration -> Integrations and click on "add integration". Then search for Rewe.
 
 ### Configuration Variables
@@ -46,7 +54,7 @@ Go to Configuration -> Integrations and click on "add integration". Then search 
 - **only_direct** (optional - default is false): Only show direct connections.
 
 ### YAML Config
-DEPRECATED, use the GUI setup instead!
+DEPRECATED, use the GUI setup instead! Only valid for Version 1.X
 
 ```yaml
 # Example configuration.yaml entry
@@ -67,17 +75,17 @@ sensor:
 ```
 
 ## Bug reporting
-Open an issue over at [github issues](https://github.com/FaserF/ha-foodsharing/issues). Please prefer sending over a log with debugging enabled.
+Open an issue over at [github issues](https://github.com/FaserF/ha-deutschebahn/issues). Please prefer sending over a log with debugging enabled.
 
 To enable debugging enter the following in your configuration.yaml
 
 ```yaml
 logger:
     logs:
-        custom_components.foodsharing: debug
+        custom_components.deutschebahn: debug
 ```
 
-You can then find the log in the HA settings -> System -> Logs -> Enter "foodsharing" in the search bar -> "Load full logs"
+You can then find the log in the HA settings -> System -> Logs -> Enter "deutschebahn" in the search bar -> "Load full logs"
 
 ## Thanks to
 Huge thanks to [@homeassistant](https://github.com/home-assistant/core/tree/c741d9d0452970c39397deca1c65766c8cb917da/homeassistant/components/deutsche_bahn) for the official old integration, where this one is based on!
