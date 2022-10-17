@@ -2,8 +2,8 @@
 DOMAIN = "deutschebahn"
 ATTRIBUTION = "Data provided by bahn.de api"
 
-CONF_DESTINATION = "to"
-CONF_START = "from"
+CONF_DESTINATION = "destination"
+CONF_START = "start"
 CONF_OFFSET = "offset"
 CONF_ONLY_DIRECT = "only_direct"
 

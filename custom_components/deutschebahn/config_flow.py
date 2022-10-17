@@ -40,8 +40,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_START, default="Start"): str,
-                vol.Required(CONF_DESTINATION, default="Destination"): str,
+                vol.Required(CONF_START): str,
+                vol.Required(CONF_DESTINATION): str,
                 vol.Required(CONF_OFFSET, default=0): cv.positive_int,
                 vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
             },
