@@ -73,6 +73,12 @@ class DeutscheBahnSensor(SensorEntity):
         return self._name
 
     @property
+    def unique_id(self) -> str:
+        """Return the unique ID of the sensor."""
+        return self._name
+        #return f"{self.start}_{self.goal}"
+
+    @property
     def icon(self):
         """Return the icon for the frontend."""
         return "mdi:train"
