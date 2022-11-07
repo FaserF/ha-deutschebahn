@@ -36,16 +36,15 @@ where `<config>` is your Home Assistant configuration directory.
 
 >__NOTE__: Do not download the file by using the link above directly, the status in the "master" branch can be in development and therefore is maybe not working.
 
-### Migrate from the old official HA integration or from this V1.X to this 2.X Version
+### Migrate from the old official HA integration or from this V1.X to 2.X Version
 1. Remove any deutschebahn (or deutsche_bahn) configuration from your configuration.yaml file
 2. Update the Integration to the latest release
 3. Restart Homeassistant
 4. Set up the integration from the UI
 
-## Configuration
-Only valid for Version 2.X:
+## ConfiguratioN
 
-Go to Configuration -> Integrations and click on "add integration". Then search for Rewe.
+Go to Configuration -> Integrations and click on "add integration". Then search for "Deutsche Bahn".
 
 ### Configuration Variables
 - **from**: The name of the start station.
