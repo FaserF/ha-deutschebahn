@@ -3,6 +3,18 @@
   "extends": [
     "config:base"
   ],
+  "regexManagers": [
+    {
+      "fileMatch": [
+        "/manifest.json$"
+      ],
+      "matchStrings": [
+        "schiene==?(?<currentValue>.+?)[\"']?\\s+"
+      ],
+      "datasourceTemplate": "pypi",
+      "depNameTemplate": "schiene"
+    }
+  ],
   "packageRules": [
     {
       "matchManagers": [
@@ -10,7 +22,8 @@
       ],
       "addLabels": [
         "python"
-      ]
+      ],
+      "automerge": true
     },
     {
       "matchManagers": [
@@ -19,7 +32,8 @@
       "matchDepTypes": [
         "dev"
       ],
-      "rangeStrategy": "pin"
+      "rangeStrategy": "pin",
+      "automerge": true
     },
     {
       "matchManagers": [
