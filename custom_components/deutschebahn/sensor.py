@@ -62,7 +62,7 @@ class DeutscheBahnSensor(SensorEntity):
         self.updated = datetime.now()
         self.start = config[CONF_START]
         self.goal = config[CONF_DESTINATION]
-        self.offset = timedelta(seconds=config[CONF_OFFSET])
+        self.offset = timedelta(minutes=config[CONF_OFFSET])
         self.only_direct = config[CONF_ONLY_DIRECT]
         self.schiene = schiene.Schiene()
         self.connections = [{}]
@@ -104,7 +104,7 @@ class DeutscheBahnSensor(SensorEntity):
                 connections["next"] = self.connections[1]["departure"]
             if len(self.connections) > 2:
                 connections["next_on"] = self.connections[2]["departure"]
-        else: 
+        else:
             connections = None
         return connections
 
@@ -139,12 +139,12 @@ class DeutscheBahnSensor(SensorEntity):
 
                     if self.connections[0].get("delay", 0) != 0:
                         self._state = f"{self.connections[0]['departure']} + {self.connections[0]['delay']}"
-                    else: 
+                    else:
                         self._state = self.connections[0].get("departure", "Unknown")
-                else: 
+                else:
                     _LOGGER.exception(f"Data from DB for direction: '{self.start}' '{self.goal}' was empty, retrying at next sync run. Maybe also check if you have spelled your start and destination correct?")
                     self._available = False
-                    
+
         except:
             self._available = False
             _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}'")
