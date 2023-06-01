@@ -102,8 +102,12 @@ class DeutscheBahnSensor(SensorEntity):
             connections = self.connections[0]
             if len(self.connections) > 1:
                 connections["next"] = self.connections[1]["departure"]
+                connections["next_delay"] = self.connections[1]["delay"]
+                connections["next_canceled"] = self.connections[1]["canceled"]
             if len(self.connections) > 2:
                 connections["next_on"] = self.connections[2]["departure"]
+                connections["next_on_delay"] = self.connections[2]["delay"]
+                connections["next_on_canceled"] = self.connections[2]["canceled"]
         else:
             connections = None
         return connections
