@@ -73,6 +73,9 @@ sensor:
     only_direct: false
 ```
 
+## Lovelace Custom Card
+[silviokennecke](https://github.com/silviokennecke/) has created [this](https://github.com/silviokennecke/ha-custom-components/wiki/Components#public-transport-connection) great lovelace card for a better overview of the train departures. Be sure to check it out.
+
 ## Bug reporting
 Open an issue over at [github issues](https://github.com/FaserF/ha-deutschebahn/issues). Please prefer sending over a log with debugging enabled.
 
