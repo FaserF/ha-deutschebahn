@@ -42,7 +42,6 @@ async def async_setup_entry(
     if entry.options:
         config.update(entry.options)
     sensors = DeutscheBahnSensor(config, hass)
-    async_add_entities(sensors, update_before_add=True)
     async_add_entities(
         [
             DeutscheBahnSensor(config, hass)
