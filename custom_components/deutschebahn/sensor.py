@@ -67,10 +67,8 @@ class DeutscheBahnSensor(SensorEntity):
         self.offset = timedelta(minutes=config[CONF_OFFSET])
         self.max_connections: int = config[CONF_MAX_CONNECTIONS]
         self.select_any_product: bool = any(
-            [
-                p.strip().upper() in ["*", "ALL", "ANY"]
-                for p in config[CONF_SELECTED_PRODUCTS]
-            ]
+            pattern in config[CONF_SELECTED_PRODUCTS].upper()
+            for pattern in ["*", "ALL", "ANY"]
         )
         self.selected_products: Set[str] = set(
             [
