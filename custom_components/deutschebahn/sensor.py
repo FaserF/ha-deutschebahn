@@ -1,7 +1,8 @@
 """deutschebahn sensor platform."""
 from datetime import timedelta, datetime
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Set
+import re
 
 import schiene
 import async_timeout
@@ -25,6 +26,8 @@ from .const import (
     CONF_START,
     CONF_OFFSET,
     CONF_ONLY_DIRECT,
+    CONF_MAX_CONNECTIONS,
+    CONF_SELECTED_PRODUCTS,
     ATTR_DATA,
 
     DOMAIN,
@@ -62,6 +65,20 @@ class DeutscheBahnSensor(SensorEntity):
         self.start = config[CONF_START]
         self.goal = config[CONF_DESTINATION]
         self.offset = timedelta(minutes=config[CONF_OFFSET])
+        self.max_connections: int = config[CONF_MAX_CONNECTIONS]
+        self.select_any_product: bool = any(
+            [
+                p.strip().upper() in ["*", "ALL", "ANY"]
+                for p in config[CONF_SELECTED_PRODUCTS]
+            ]
+        )
+        self.selected_products: Set[str] = set(
+            [
+                product.strip()
+                for product in re.split(r", |,|\s", config[CONF_SELECTED_PRODUCTS])
+                if not product.isspace()
+            ]
+        )
         self.only_direct = config[CONF_ONLY_DIRECT]
         self.schiene = schiene.Schiene()
         self.connections = [{}]
@@ -98,7 +115,7 @@ class DeutscheBahnSensor(SensorEntity):
     def extra_state_attributes(self):
         """Return the state attributes."""
         if len(self.connections) > 0:
-            connections = self.connections[0]
+            connections = self.connections[0].copy()
             if len(self.connections) > 1:
                 connections["next"] = self.connections[1]["departure"]
                 connections["next_delay"] = self.connections[1]["delay"]
@@ -109,6 +126,7 @@ class DeutscheBahnSensor(SensorEntity):
                 connections["next_on_canceled"] = self.connections[2]["canceled"]
         else:
             connections = None
+        connections["departures"] = self.connections
         return connections
 
     async def async_update(self):
@@ -153,12 +171,23 @@ class DeutscheBahnSensor(SensorEntity):
             _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}'")
 
 def fetch_schiene_connections(hass, self):
-    _LOGGER.debug(f"Fetching update from schiene python module for '{self.start}' '{self.goal}'")
-    data = self.schiene.connections(
+    raw_data = self.schiene.connections(
         self.start,
         self.goal,
         dt_util.as_local(dt_util.utcnow() + self.offset),
         self.only_direct,
     )
-    _LOGGER.debug(f"Fetched data: {data}")
+    _LOGGER.debug(f"Fetched data: {raw_data}")
+
+    data = []
+    for connection in raw_data:
+        if len(data) == self.max_connections:
+            break
+        if self.select_any_product or set(connection["products"]).intersection(
+            self.selected_products
+        ):
+            data.append(connection)
+
+    _LOGGER.debug(f"Filtered data: {data}")
+
     return data

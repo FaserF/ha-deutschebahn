@@ -8,7 +8,9 @@
           "start": "Start station",
           "destination": "Destination station",
           "offset": "Offset in minutes",
-          "only_direct": "Only show direct connections?"
+          "only_direct": "Only show direct connections?",
+          "max_connections": "Max connections in sensor",
+          "selected_products": "Product selection (comma seperated)"
         }
       }
     },

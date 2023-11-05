@@ -13,6 +13,8 @@ from .const import (  # pylint: disable=unused-import
     CONF_START,
     CONF_OFFSET,
     CONF_ONLY_DIRECT,
+    CONF_MAX_CONNECTIONS,
+    CONF_SELECTED_PRODUCTS,
 )
 DOMAIN = "deutschebahn"
 
@@ -43,6 +45,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_START): str,
                 vol.Required(CONF_DESTINATION): str,
                 vol.Required(CONF_OFFSET, default=0): cv.positive_int,
+                vol.Required(CONF_MAX_CONNECTIONS, default=2): cv.positive_int,
+                vol.Required(CONF_SELECTED_PRODUCTS, default="All"): str,
                 vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
             },
         )
