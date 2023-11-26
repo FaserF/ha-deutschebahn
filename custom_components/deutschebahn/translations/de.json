@@ -1,4 +1,18 @@
 {
+  "options": {
+    "flow_title": "Einrichtung der:{entity_name}",
+    "step": {
+      "init": {
+        "description": "Trage hier deine Zug Station Informationen ein für die Suchabfrage.",
+        "data": {
+          "offset": "Versatz in Minutes",
+          "only_direct": "Zeige nur direkte Verbindungen?",
+          "max_connections": "Maximale Anzahle der angezeigten Verbindungen",
+          "selected_products": "Produktauswahl"
+        }
+      }
+    }
+  },
   "config": {
     "flow_title": "Einrichtung der DeutscheBahn Integration",
     "step": {

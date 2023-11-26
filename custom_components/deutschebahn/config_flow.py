@@ -1,11 +1,12 @@
 """Config flow"""
 import logging
+from typing import Any
 
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
+from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 
 from .const import (  # pylint: disable=unused-import
@@ -19,6 +20,47 @@ from .const import (  # pylint: disable=unused-import
 DOMAIN = "deutschebahn"
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+
+        def __get_option(key: str) -> Any:
+            return self.config_entry.options.get(key, self.config_entry.data[key])
+
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_OFFSET,
+                        default=__get_option(CONF_OFFSET),
+                    ): cv.positive_int,
+                    vol.Required(
+                        CONF_MAX_CONNECTIONS,
+                        default=__get_option(CONF_MAX_CONNECTIONS),
+                    ): cv.positive_int,
+                    vol.Required(
+                        CONF_SELECTED_PRODUCTS,
+                        default=__get_option(CONF_SELECTED_PRODUCTS),
+                    ): str,
+                    vol.Required(
+                        CONF_ONLY_DIRECT,
+                        default=__get_option(CONF_ONLY_DIRECT),
+                    ): cv.boolean,
+                }
+            ),
+        )
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -52,5 +94,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         return self.async_show_form(
-            step_id="user", data_schema=data_schema, errors=errors
+            step_id="user",
+            data_schema=data_schema,
+            errors=errors,
         )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> config_entries.OptionsFlow:
+        """Create the options flow."""
+        return OptionsFlowHandler(config_entry)
