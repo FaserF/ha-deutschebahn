@@ -8,7 +8,7 @@
           "offset": "Versatz in Minutes",
           "only_direct": "Zeige nur direkte Verbindungen?",
           "max_connections": "Maximale Anzahle der angezeigten Verbindungen",
-          "selected_products": "Produktauswahl"
+          "ignored_products": "Zu ignorierende Produkte"
         }
       }
     }
@@ -24,7 +24,7 @@
           "offset": "Versatz in Minutes",
           "only_direct": "Zeige nur direkte Verbindungen?",
           "max_connections": "Maximale Anzahle der angezeigten Verbindungen",
-          "selected_products": "Produktauswahl"
+          "ignored_products": "Zu ignorierende Produkte"
         }
       }
     },

@@ -27,9 +27,8 @@ from .const import (
     CONF_OFFSET,
     CONF_ONLY_DIRECT,
     CONF_MAX_CONNECTIONS,
-    CONF_SELECTED_PRODUCTS,
+    CONF_IGNORED_PRODUCTS,
     ATTR_DATA,
-
     DOMAIN,
 )
 
@@ -65,18 +64,8 @@ class DeutscheBahnSensor(SensorEntity):
         self.start = config[CONF_START]
         self.goal = config[CONF_DESTINATION]
         self.offset = timedelta(minutes=config[CONF_OFFSET])
-        self.max_connections: int = config[CONF_MAX_CONNECTIONS]
-        self.select_any_product: bool = any(
-            pattern in config[CONF_SELECTED_PRODUCTS].upper()
-            for pattern in ["*", "ALL", "ANY"]
-        )
-        self.selected_products: Set[str] = set(
-            [
-                product.strip()
-                for product in re.split(r", |,|\s", config[CONF_SELECTED_PRODUCTS])
-                if not product.isspace()
-            ]
-        )
+        self.max_connections: int = config.get(CONF_MAX_CONNECTIONS, 2)
+        self.ignored_products = config.get(CONF_IGNORED_PRODUCTS, [])
         self.only_direct = config[CONF_ONLY_DIRECT]
         self.schiene = schiene.Schiene()
         self.connections = [{}]
@@ -181,11 +170,10 @@ def fetch_schiene_connections(hass, self):
     for connection in raw_data:
         if len(data) == self.max_connections:
             break
-        if self.select_any_product or set(connection["products"]).intersection(
-            self.selected_products
-        ):
-            data.append(connection)
+        elif set(connection["products"]).intersection(self.ignored_products):
+            continue
 
+        data.append(connection)
     _LOGGER.debug(f"Filtered data: {data}")
 
     return data
