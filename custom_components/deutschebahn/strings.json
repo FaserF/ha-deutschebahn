@@ -1,4 +1,18 @@
 {
+  "options": {
+    "flow_title": "Setup DB:{entity_name}",
+    "step": {
+      "init": {
+        "description": "Submit your train station details for the search queries.",
+        "data": {
+          "offset": "Offset in minutes",
+          "only_direct": "Only show direct connections?",
+          "max_connections": "Max connections in sensor",
+          "ignored_products": "Products to ignore"
+        }
+      }
+    }
+  },
   "config": {
     "flow_title": "Setup DeutscheBahn",
     "step": {
@@ -8,7 +22,9 @@
           "start": "Start station",
           "destination": "Destination station",
           "offset": "Offset in minutes",
-          "only_direct": "Only show direct connections?"
+          "only_direct": "Only show direct connections?",
+          "max_connections": "Max connections in sensor",
+          "ignored_products": "Products to ignore"
         }
       }
     },
