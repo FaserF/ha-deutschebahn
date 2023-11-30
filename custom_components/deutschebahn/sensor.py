@@ -155,7 +155,7 @@ class DeutscheBahnSensor(SensorEntity):
 
         except:
             self._available = False
-            _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}'")
+            _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}' - Most likely it is a temporary API issue from DB and will stop working after a HA restart/some time.")
 
 def fetch_schiene_connections(hass, self):
     raw_data = self.schiene.connections(
