@@ -42,7 +42,7 @@ where `<config>` is your Home Assistant configuration directory.
 3. Restart Homeassistant
 4. Set up the integration from the UI
 
-## ConfiguratioN
+## Configuration
 
 Go to Configuration -> Integrations and click on "add integration". Then search for "Deutsche Bahn".
 
@@ -50,7 +50,8 @@ Go to Configuration -> Integrations and click on "add integration". Then search 
 - **from**: The name of the start station.
 - **to**: The name of the end/destination station.
 - **offset** (optional): Do not display departures leaving sooner than this number of seconds. Useful if you are a couple of minutes away from the stop. The formats "HH:MM" and "HH:MM:SS" are also supported.
-- **only_direct** (optional - default is false): Only show direct connections.
+- **only direct** (optional - default is false): Only show direct connections.
+- **products to ignore** (optional - default is empty): Filter train types, that should be excluded
 
 ### YAML Config
 DEPRECATED, use the GUI setup instead! Only valid for Version 1.X
