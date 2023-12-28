@@ -103,14 +103,12 @@ class DeutscheBahnSensor(SensorEntity):
         """Return the state attributes."""
         if len(self.connections) > 0:
             connections = self.connections[0].copy()
-            if len(self.connections) > 1:
-                connections["next"] = self.connections[1]["departure"]
-                connections["next_delay"] = self.connections[1]["delay"]
-                connections["next_canceled"] = self.connections[1]["canceled"]
-            if len(self.connections) > 2:
-                connections["next_on"] = self.connections[2]["departure"]
-                connections["next_on_delay"] = self.connections[2]["delay"]
-                connections["next_on_canceled"] = self.connections[2]["canceled"]
+            for cons in range(1,len(self.connections)):
+                if len(self.connections) > cons:
+                    connections[f"next_{cons}"] = self.connections[cons]["departure"]
+                    connections[f"next_{cons}_delay"] = self.connections[cons]["delay"]
+                    connections[f"next_{cons}_canceled"] = self.connections[cons]["canceled"]
+                    connections[f"next_{cons}_arrival"] = self.connections[cons]["arrival"]
         else:
             connections = None
         connections["departures"] = self.connections
