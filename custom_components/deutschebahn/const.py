@@ -16,6 +16,6 @@ CONF_IGNORED_PRODUCTS_OPTIONS = {
     "EC": "EuroCity (EC)",
     "IC": "Intercity (IC)",
     "ICE": "Intercity Express (ICE)",
-    "TVG": "Train à grande vitesse (TVG)",
+    "TGV": "Train à grande vitesse (TGV)",
 }
 ATTR_DATA = "data"
