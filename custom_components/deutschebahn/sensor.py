@@ -14,9 +14,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import (
     ConfigType,
-    HomeAssistantType,
     DiscoveryInfoType,
 )
+from homeassistant.core import HomeAssistant
 import homeassistant.util.dt as dt_util
 import voluptuous as vol
 
@@ -36,7 +36,7 @@ _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(minutes=2)
 
 async def async_setup_entry(
-    hass: HomeAssistantType, entry: ConfigType, async_add_entities
+    hass: HomeAssistant, entry: ConfigType, async_add_entities
 ):
     """Setup sensors from a config entry created in the integrations UI."""
     config = hass.data[DOMAIN][entry.entry_id]
@@ -54,7 +54,7 @@ async def async_setup_entry(
 class DeutscheBahnSensor(SensorEntity):
     """Implementation of a Deutsche Bahn sensor."""
 
-    def __init__(self, config, hass: HomeAssistantType):
+    def __init__(self, config, hass: HomeAssistant):
         super().__init__()
         self._name = f"{config[CONF_START]} to {config[CONF_DESTINATION]}"
         self._state = None
