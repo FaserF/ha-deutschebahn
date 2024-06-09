@@ -16,6 +16,7 @@ from .const import (  # pylint: disable=unused-import
     CONF_MAX_CONNECTIONS,
     CONF_IGNORED_PRODUCTS,
     CONF_IGNORED_PRODUCTS_OPTIONS,
+    CONF_UPDATE_INTERVAL,
 )
 
 DOMAIN = "deutschebahn"
@@ -43,10 +44,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_OFFSET, default=__get_option(CONF_OFFSET, 0)): cv.positive_int,
-                    vol.Required(CONF_MAX_CONNECTIONS, default=__get_option(CONF_MAX_CONNECTIONS, 2)): cv.positive_int,
-                    vol.Required(CONF_IGNORED_PRODUCTS, default=__get_option(CONF_IGNORED_PRODUCTS, [])): cv.multi_select(CONF_IGNORED_PRODUCTS_OPTIONS),
-                    vol.Required(CONF_ONLY_DIRECT, default=__get_option(CONF_ONLY_DIRECT, False)): cv.boolean,
+                    vol.Required(CONF_OFFSET, default=0): cv.positive_int,
+                    vol.Required(CONF_MAX_CONNECTIONS, default=2): cv.positive_int,
+                    vol.Required(CONF_IGNORED_PRODUCTS, default=[]): cv.multi_select(CONF_IGNORED_PRODUCTS_OPTIONS),
+                    vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
+                    vol.Optional(CONF_UPDATE_INTERVAL, 2): cv.positive_int,
                 }
             ),
         )
@@ -75,6 +77,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_MAX_CONNECTIONS, default=2): cv.positive_int,
                 vol.Required(CONF_IGNORED_PRODUCTS, default=[]): cv.multi_select(CONF_IGNORED_PRODUCTS_OPTIONS),
                 vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
+                vol.Optional(CONF_UPDATE_INTERVAL, 2): cv.positive_int,
             }
         )
 

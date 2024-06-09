@@ -25,18 +25,19 @@ from .const import (
     CONF_ONLY_DIRECT,
     CONF_MAX_CONNECTIONS,
     CONF_IGNORED_PRODUCTS,
+    CONF_UPDATE_INTERVAL,
     ATTR_DATA,
     DOMAIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = timedelta(minutes=2)
 
 async def async_setup_entry(
     hass: core.HomeAssistant, entry: ConfigType, async_add_entities
 ):
     """Setup sensors from a config entry created in the integrations UI."""
     config = hass.data[DOMAIN][entry.entry_id]
+    SCAN_INTERVAL = timedelta(minutes=config.get(CONF_UPDATE_INTERVAL, 2))
     _LOGGER.debug("Sensor async_setup_entry")
     if entry.options:
         config.update(entry.options)

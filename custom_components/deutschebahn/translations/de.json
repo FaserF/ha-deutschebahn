@@ -5,10 +5,11 @@
       "init": {
         "description": "Trage hier deine Zug Station Informationen ein für die Suchabfrage.",
         "data": {
-          "offset": "Versatz in Minutes",
-          "only_direct": "Zeige nur direkte Verbindungen?",
-          "max_connections": "Maximale Anzahle der angezeigten Verbindungen",
-          "ignored_products": "Zu ignorierende Produkte"
+          "offset": "Versatz in Minuten",
+          "only_direct": "Nur direkte Verbindungen anzeigen?",
+          "max_connections": "Maximale Anzahl der angezeigten Verbindungen",
+          "ignored_products": "Zu ignorierende Produkte",
+          "scan_interval": "Aktualisierungsintervall in Sekunden"
         }
       }
     }
@@ -19,12 +20,13 @@
       "user": {
         "description": "Trage hier deine Zug Station Informationen ein für die Suchabfrage.",
         "data": {
-          "start": "Start Station",
-          "destination": "Ziel station",
-          "offset": "Versatz in Minutes",
-          "only_direct": "Zeige nur direkte Verbindungen?",
-          "max_connections": "Maximale Anzahle der angezeigten Verbindungen",
-          "ignored_products": "Zu ignorierende Produkte"
+          "start": "Startstation",
+          "destination": "Zielstation",
+          "offset": "Versatz in Minuten",
+          "only_direct": "Nur direkte Verbindungen anzeigen?",
+          "max_connections": "Maximale Anzahl der angezeigten Verbindungen",
+          "ignored_products": "Zu ignorierende Produkte",
+          "scan_interval": "Aktualisierungsintervall in Sekunden"
         }
       }
     },
@@ -32,7 +34,7 @@
       "already_configured": "Diese Start & Ziel Station Kombination ist bereits konfiguriert."
     },
     "error": {
-      "invalid_station": "Ungültige Start/Ziel Station",
+      "invalid_station": "Ungültige Start/Ziel-Station",
       "unknown": "Unbekannter Fehler"
     }
   }
