@@ -2,23 +2,20 @@
 from datetime import timedelta, datetime
 import logging
 from typing import Optional
-
 import async_timeout
+from urllib.parse import quote
+
 import schiene
+import homeassistant.util.dt as dt_util
+import requests
+from bs4 import BeautifulSoup
 
 from homeassistant import config_entries, core
-
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    DataUpdateCoordinator,
-    UpdateFailed,
-)
-
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import ATTR_ATTRIBUTION
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import homeassistant.helpers.config_validation as cv
-import homeassistant.util.dt as dt_util
-import voluptuous as vol
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .const import (
     ATTRIBUTION,
@@ -36,15 +33,20 @@ _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(minutes=2)
 
 async def async_setup_entry(
-    hass: core.HomeAssistant, entry: config_entries.ConfigEntry, async_add_entities
+    hass: core.HomeAssistant, entry: ConfigType, async_add_entities
 ):
-    """Set up sensors from a config entry created in the integrations UI."""
+    """Setup sensors from a config entry created in the integrations UI."""
     config = hass.data[DOMAIN][entry.entry_id]
     _LOGGER.debug("Sensor async_setup_entry")
     if entry.options:
         config.update(entry.options)
     sensors = DeutscheBahnSensor(config, hass)
-    async_add_entities([sensors], update_before_add=True)
+    async_add_entities(
+        [
+            DeutscheBahnSensor(config, hass)
+        ],
+        update_before_add=True
+    )
 
 class DeutscheBahnSensor(SensorEntity):
     """Implementation of a Deutsche Bahn sensor."""
@@ -95,27 +97,25 @@ class DeutscheBahnSensor(SensorEntity):
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        if len(self.connections) > 0:
-            connections = self.connections[0].copy()
-            for cons in range(1, len(self.connections)):
-                if len(self.connections) > cons:
-                    connections[f"next_{cons}"] = self.connections[cons]["departure"]
-                    connections[f"next_{cons}_delay"] = self.connections[cons]["delay"]
-                    connections[f"next_{cons}_canceled"] = self.connections[cons]["canceled"]
-                    connections[f"next_{cons}_arrival"] = self.connections[cons]["arrival"]
-        else:
-            connections = None
-        connections["departures"] = self.connections
-        return connections
+        attributes = {
+            "departures": self.connections,
+        }
+        if self.connections:
+            first_connection = self.connections[0]
+            departure_current = first_connection.get("departure") + " +" + str(first_connection.get("delay", 0))
+            arrival_current = first_connection.get("arrival") + " +" + str(first_connection.get("delay_arrival", 0))
+            attributes["departure_current"] = departure_current
+            attributes["arrival_current"] = arrival_current
+        return attributes
 
     async def async_update(self):
         try:
-            async with async_timeout.timeout(30):
+            with async_timeout.timeout(30):
                 hass = self.hass
                 """Pull data from the bahn.de web page."""
                 _LOGGER.debug(f"Update the connection data for '{self.start}' '{self.goal}'")
                 self.connections = await hass.async_add_executor_job(
-                        fetch_schiene_connections, hass, self
+                        fetch_schiene_connections, hass, self, self.ignored_products
                     )
 
                 if not self.connections:
@@ -125,12 +125,17 @@ class DeutscheBahnSensor(SensorEntity):
 
                 if connections_count > 0:
                     for con in self.connections:
+                        # Detail info is not useful. Having a more consistent interface
+                        # simplifies usage of template sensors.
                         if "details" in con:
+                            #_LOGGER.debug(f"Processing connection: {con}")
                             con.pop("details")
                             delay = con.get("delay", {"delay_departure": 0, "delay_arrival": 0})
                             con["delay"] = delay["delay_departure"]
                             con["delay_arrival"] = delay["delay_arrival"]
                             con["ontime"] = con.get("ontime", False)
+                            #self.attrs[ATTR_DATA] = self.connections
+                            #self.attrs[ATTR_ATTRIBUTION] = f"last updated {datetime.now()} \n{ATTRIBUTION}"
 
                     if self.connections[0].get("delay", 0) != 0:
                         self._state = f"{self.connections[0]['departure']} + {self.connections[0]['delay']}"
@@ -140,23 +145,27 @@ class DeutscheBahnSensor(SensorEntity):
                     _LOGGER.exception(f"Data from DB for direction: '{self.start}' '{self.goal}' was empty, retrying at next sync run. Maybe also check if you have spelled your start and destination correct?")
                     self._available = False
 
-        except Exception as e:
+        except:
             self._available = False
-            _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}': {str(e)}")
+            _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}' - Most likely it is a temporary API issue from DB and will stop working after a HA restart/some time.")
 
-def fetch_schiene_connections(hass, self):
+def fetch_schiene_connections(hass, self, ignored_products):
     raw_data = self.schiene.connections(
         self.start,
         self.goal,
         dt_util.as_local(dt_util.utcnow() + self.offset),
         self.only_direct,
     )
+    _LOGGER.debug(f"Fetched data: {raw_data}")
+
     data = []
     for connection in raw_data:
         if len(data) == self.max_connections:
             break
-        elif set(connection["products"]).intersection(self.ignored_products):
+        elif set(connection["products"]).intersection(ignored_products):
             continue
 
         data.append(connection)
+    _LOGGER.debug(f"Filtered data: {data}")
+
     return data
