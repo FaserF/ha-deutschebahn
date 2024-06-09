@@ -56,29 +56,43 @@ Go to Configuration -> Integrations and click on "add integration". Then search 
 - **offset** (optional): Do not display departures leaving sooner than this number of seconds. Useful if you are a couple of minutes away from the stop. The formats "HH:MM" and "HH:MM:SS" are also supported.
 - **only direct** (optional - default is false): Only show direct connections.
 - **products to ignore** (optional - default is empty): Filter train types, that should be excluded
+- **maximum connections** (optional - default is 2): Specify how many next connections should be fetched
+- **scan interval** (optional - default is 2 minutes): Specify the refresh interval in minutes
 
-### YAML Config
-DEPRECATED, use the GUI setup instead! Only valid for Version 1.X
+## Accessing the data
 
+### Automations
 ```yaml
-# Example configuration.yaml entry
-sensor:
-  - platform: deutschebahn
-    from: NAME_OF_START_STATION
-    to: NAME_OF_FINAL_STATION
+automation:
+  - alias: "Notification for Train Delay"
+    trigger:
+      platform: template
+      value_template: "{{ state_attr('sensor.fromstation_to_station', 'departures')[0].delay | int > 5 }}"
+    action:
+      - service: notify.notify
+        data_template:
+          message: >
+            The train departing at {{ states.sensor.fromstation_to_station.attributes.departures[0].departure_current }}
+            and arriving at {{ states.sensor.fromstation_to_station.attributes.departures[0].arrival_current }}
+            is delayed by {{ states.sensor.fromstation_to_station.attributes.departures[0].delay }}
+            minutes and costs {{ states.sensor.fromstation_to_station.attributes.departures[0].price }}.
+            Next train after that: {{ states.sensor.fromstation_to_station.attributes.departures[0].departure_current }}
 ```
 
+### Custom sensor
+Add a custom sensor in your configuration.yaml
+
 ```yaml
-# Example advanced configuration.yaml entry
 sensor:
-  - platform: deutschebahn
-    from: NAME_OF_START_STATION
-    to: NAME_OF_FINAL_STATION
-    offset: 00:03:30
-    only_direct: false
+  - platform: template
+    sensors:
+      next_train_departure:
+        friendly_name: "Next Train Departure"
+        value_template: "{{ state_attr('sensor.fromstation_to_station', 'connections')[0].departure }}"
+        icon_template: mdi:train
 ```
 
-## Lovelace Custom Card
+### Lovelace Custom Card
 [silviokennecke](https://github.com/silviokennecke/) has created [this](https://github.com/silviokennecke/ha-custom-components/wiki/Components#public-transport-connection) great lovelace card for a better overview of the train departures. Be sure to check it out.
 
 ## Bug reporting
