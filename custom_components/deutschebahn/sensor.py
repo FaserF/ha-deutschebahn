@@ -15,6 +15,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import ATTR_ATTRIBUTION
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .const import (
@@ -37,14 +38,14 @@ async def async_setup_entry(
 ):
     """Setup sensors from a config entry created in the integrations UI."""
     config = hass.data[DOMAIN][entry.entry_id]
-    SCAN_INTERVAL = timedelta(minutes=config.get(CONF_UPDATE_INTERVAL, 2))
+    scan_interval = timedelta(minutes=config.get(CONF_UPDATE_INTERVAL, 2))
     _LOGGER.debug("Sensor async_setup_entry")
     if entry.options:
         config.update(entry.options)
-    sensors = DeutscheBahnSensor(config, hass)
+    sensors = DeutscheBahnSensor(config, hass, scan_interval)
     async_add_entities(
         [
-            DeutscheBahnSensor(config, hass)
+            DeutscheBahnSensor(config, hass, scan_interval)
         ],
         update_before_add=True
     )
@@ -52,7 +53,7 @@ async def async_setup_entry(
 class DeutscheBahnSensor(SensorEntity):
     """Implementation of a Deutsche Bahn sensor."""
 
-    def __init__(self, config, hass: core.HomeAssistant):
+    def __init__(self, config, hass: core.HomeAssistant, scan_interval: timedelta):
         super().__init__()
         self._name = f"{config[CONF_START]} to {config[CONF_DESTINATION]}"
         self._state = None
@@ -67,6 +68,7 @@ class DeutscheBahnSensor(SensorEntity):
         self.only_direct = config[CONF_ONLY_DIRECT]
         self.schiene = schiene.Schiene()
         self.connections = [{}]
+        self.scan_interval = scan_interval
 
     @property
     def name(self):
@@ -117,6 +119,19 @@ class DeutscheBahnSensor(SensorEntity):
                         con["arrival_current"] = corrected_arrival_time.strftime("%H:%M")
         attributes["departures"] = self.connections
         return attributes
+
+    async def async_added_to_hass(self):
+        """Call when entity is added to hass."""
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            async_track_time_interval(
+                self.hass, self._async_refresh_data, self.scan_interval
+            )
+        )
+
+    async def _async_refresh_data(self, now=None):
+        """Refresh the data."""
+        await self.async_update_ha_state(force_refresh=True)
 
     async def async_update(self):
         try:
