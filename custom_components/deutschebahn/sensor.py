@@ -118,6 +118,7 @@ class DeutscheBahnSensor(SensorEntity):
                         con["departure_current"] = corrected_departure_time.strftime("%H:%M")
                         con["arrival_current"] = corrected_arrival_time.strftime("%H:%M")
         attributes["departures"] = self.connections
+        attributes["last_update"] = datetime.now()
         return attributes
 
     async def async_added_to_hass(self):
