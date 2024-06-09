@@ -9,6 +9,7 @@ CONF_ONLY_DIRECT = "only_direct"
 CONF_MAX_CONNECTIONS = "max_connections"
 CONF_IGNORED_PRODUCTS = "ignored_products"
 CONF_IGNORED_PRODUCTS_OPTIONS = {
+    "BUS": "Busverkehr (BUS)",
     "STR": "Straßenbahn (STR)",
     "S": "Stadtbahn (S-Bahn)",
     "RE": "Regional Express (RE)",
@@ -17,5 +18,6 @@ CONF_IGNORED_PRODUCTS_OPTIONS = {
     "IC": "Intercity (IC)",
     "ICE": "Intercity Express (ICE)",
     "TGV": "Train à grande vitesse (TGV)",
+    "EST": "LGV Est européenne",
 }
 ATTR_DATA = "data"
