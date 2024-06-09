@@ -98,15 +98,24 @@ class DeutscheBahnSensor(SensorEntity):
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        attributes = {
-            "departures": self.connections,
-        }
+        attributes = {}
         if self.connections:
-            first_connection = self.connections[0]
-            departure_current = first_connection.get("departure") + " +" + str(first_connection.get("delay", 0))
-            arrival_current = first_connection.get("arrival") + " +" + str(first_connection.get("delay_arrival", 0))
-            attributes["departure_current"] = departure_current
-            attributes["arrival_current"] = arrival_current
+            for con in self.connections:
+                if "departure" in con and "arrival" in con:
+                    # Parse departure and arrival times
+                    departure_time = dt_util.parse_time(con.get("departure"))
+                    arrival_time = dt_util.parse_time(con.get("arrival"))
+                    if departure_time and arrival_time:
+                        # Create datetime objects for departure and arrival times
+                        departure_datetime = datetime.combine(datetime.now().date(), departure_time)
+                        arrival_datetime = datetime.combine(datetime.now().date(), arrival_time)
+                        # Apply delays
+                        corrected_departure_time = departure_datetime + timedelta(minutes=con.get("delay", 0))
+                        corrected_arrival_time = arrival_datetime + timedelta(minutes=con.get("delay_arrival", 0))
+                        # Format and add current departure and arrival times
+                        con["departure_current"] = corrected_departure_time.strftime("%H:%M")
+                        con["arrival_current"] = corrected_arrival_time.strftime("%H:%M")
+        attributes["departures"] = self.connections
         return attributes
 
     async def async_update(self):
