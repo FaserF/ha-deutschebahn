@@ -1,4 +1,3 @@
-"""Bahn.de Custom Component."""
 import asyncio
 import logging
 from datetime import timedelta
@@ -22,23 +21,22 @@ async def async_setup_entry(
     """Set up platform from a ConfigEntry."""
     hass.data.setdefault(DOMAIN, {})
     hass_data = dict(entry.data)
-    # Registers update listener to update config entry when options are updated.
+
     unsub_options_update_listener = entry.add_update_listener(options_update_listener)
-    # Store a reference to the unsubscribe function to cleanup if an entry is unloaded.
     hass_data["unsub_options_update_listener"] = unsub_options_update_listener
     hass.data[DOMAIN][entry.entry_id] = hass_data
 
-    # Forward the setup to the sensor platform.
     hass.async_create_task(
         hass.config_entries.async_forward_entry_setup(entry, "sensor")
     )
 
-    config = hass.data[DOMAIN][entry.entry_id]
     async def async_update_data():
         """Fetch data from Schiene."""
-        update_interval=timedelta(minutes=config[CONF_SCAN_INTERVAL])
+        config = hass.data[DOMAIN][entry.entry_id]
+        update_interval = config.get("scan_interval", 2)  # Default scan interval
         async with async_timeout.timeout(update_interval - 1):
-            await hass.async_add_executor_job(lambda: data.update())
+            # Assuming data.update() is an async function, no need for async_add_executor_job
+            await data.update()
 
             if not data.state:
                 raise UpdateFailed(f"Error fetching {entry.entry_id} Schiene state")
@@ -60,23 +58,13 @@ async def options_update_listener(
     """Handle options update."""
     await hass.config_entries.async_reload(config_entry.entry_id)
 
-async def async_update(self):
-    """Async wrapper for update method."""
-    return await self._hass.async_add_executor_job(self._update)
-
 async def async_unload_entry(
     hass: core.HomeAssistant, entry: config_entries.ConfigEntry
 ) -> bool:
     """Unload a config entry."""
-    unload_ok = all(
-        await asyncio.gather(
-            *[hass.config_entries.async_forward_entry_unload(entry, "sensor")]
-        )
-    )
-    # Remove options_update_listener.
+    unload_ok = await hass.config_entries.async_forward_entry_unload(entry, "sensor")
     hass.data[DOMAIN][entry.entry_id]["unsub_options_update_listener"]()
 
-    # Remove config entry from domain.
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
 
