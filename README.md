@@ -9,9 +9,9 @@ The `deutschebahn` sensor will give you the departure time of the next train for
 
 The official Deutsche Bahn Homeassistant integration got removed with release 2022.11 - therefore this custom integration exists. It got removed due to cloud scraping, but still was fully functional.
 
-Please note that I will only give limited support on this integration
+Please note that I will only give limited support on this integration.
 
-This integration is based on the formerly officia HA DB integration, see [here](https://github.com/home-assistant/core/tree/c741d9d0452970c39397deca1c65766c8cb917da/homeassistant/components/deutsche_bahn).
+This integration is based on the formerly official HA DB integration, see [here](https://github.com/home-assistant/core/tree/c741d9d0452970c39397deca1c65766c8cb917da/homeassistant/components/deutsche_bahn).
 
 This sensor stores a lot of attributes which can be accessed by other sensors, e.g., a [template sensor](https://www.home-assistant.io/integrations/template/).
 
