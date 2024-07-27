@@ -9,7 +9,7 @@
           "only_direct": "Only show direct connections?",
           "max_connections": "Max connections in sensor",
           "ignored_products": "Products to ignore",
-          "scan_interval": "Scan interval in seconds"
+          "scan_interval": "Scan interval in minutes"
         }
       }
     }
@@ -26,7 +26,7 @@
           "only_direct": "Only show direct connections?",
           "max_connections": "Max connections in sensor",
           "ignored_products": "Products to ignore",
-          "scan_interval": "Scan interval in seconds"
+          "scan_interval": "Scan interval in minutes"
         }
       }
     },

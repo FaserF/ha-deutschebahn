@@ -6,8 +6,8 @@ CONF_DESTINATION = "destination"
 CONF_START = "start"
 CONF_OFFSET = "offset"
 CONF_ONLY_DIRECT = "only_direct"
-CONF_MAX_CONNECTIONS = "maximum count of connections that will be fetched"
-CONF_UPDATE_INTERVAL = "refresh time in minutes"
+CONF_MAX_CONNECTIONS = "max_connections"
+CONF_UPDATE_INTERVAL = "scan_interval"
 CONF_IGNORED_PRODUCTS = "ignored_products"
 CONF_IGNORED_PRODUCTS_OPTIONS = {
     "BUS": "Busverkehr (BUS)",
