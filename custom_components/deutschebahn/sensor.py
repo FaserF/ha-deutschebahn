@@ -181,22 +181,49 @@ class DeutscheBahnSensor(SensorEntity):
             _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}' - Most likely it is a temporary API issue from DB and will stop working after a HA restart/some time.")
 
 def fetch_schiene_connections(hass, self, ignored_products):
-    raw_data = self.schiene.connections(
-        self.start,
-        self.goal,
-        dt_util.as_local(dt_util.utcnow() + self.offset),
-        self.only_direct,
-    )
-    _LOGGER.debug(f"Fetched data: {raw_data}")
+    """Fetch connections from Schiene API and apply offset filter."""
+    try:
+        raw_data = self.schiene.connections(
+            self.start,
+            self.goal,
+            dt_util.as_local(dt_util.utcnow() + self.offset),
+            self.only_direct,
+        )
+        _LOGGER.debug(f"Fetched raw data: {raw_data}")
 
-    data = []
-    for connection in raw_data:
-        if len(data) == self.max_connections:
-            break
-        elif set(connection["products"]).intersection(ignored_products):
-            continue
+        current_time = dt_util.as_local(dt_util.utcnow() + self.offset)
+        _LOGGER.debug(f"Current time with offset: {current_time}")
 
-        data.append(connection)
-    _LOGGER.debug(f"Filtered data: {data}")
+        data = []
+        for connection in raw_data:
+            departure_time = dt_util.parse_time(connection.get("departure"))
+            if departure_time:
+                # Combine date with time, then make sure datetime is aware
+                departure_datetime = datetime.combine(datetime.now().date(), departure_time)
+                # Assume timezone is the same as current_time's timezone
+                departure_datetime = dt_util.as_local(departure_datetime)
 
-    return data
+                delay_info = connection.get("delay", {"delay_departure": 0, "delay_arrival": 0})
+                delay_departure = delay_info.get("delay_departure", 0)
+                delay_arrival = delay_info.get("delay_arrival", 0)
+                departure_datetime += timedelta(minutes=delay_departure)
+                _LOGGER.debug(f"Departure datetime for connection: {departure_datetime}")
+
+                if departure_datetime < current_time:
+                    _LOGGER.debug(f"Connection filtered out, departure time {departure_datetime} is before current time {current_time}")
+                    continue
+
+            if len(data) == self.max_connections:
+                _LOGGER.debug("Reached maximum number of connections to return")
+                break
+            elif set(connection["products"]).intersection(ignored_products):
+                _LOGGER.debug(f"Connection filtered out due to ignored products: {connection['products']}")
+                continue
+
+            data.append(connection)
+
+        _LOGGER.debug(f"Filtered data: {data}")
+        return data
+    except Exception as e:
+        _LOGGER.exception(f"Error fetching or processing connections: {e}")
+        return []
