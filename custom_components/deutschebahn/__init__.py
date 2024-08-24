@@ -26,9 +26,8 @@ async def async_setup_entry(
     hass_data["unsub_options_update_listener"] = unsub_options_update_listener
     hass.data[DOMAIN][entry.entry_id] = hass_data
 
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, "sensor")
-    )
+    # Verwende hier async_forward_entry_setups anstelle von async_forward_entry_setup
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     async def async_update_data():
         """Fetch data from Schiene."""
