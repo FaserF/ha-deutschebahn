@@ -150,6 +150,11 @@ class DeutscheBahnSensor(SensorEntity):
                 connections_count = len(self.connections)
 
                 if connections_count > 0:
+                    if connections_count < self.max_connections:
+                        _LOGGER.warning(
+                            f"Requested {self.max_connections} connections, but only {connections_count} are available."
+                        )
+
                     for con in self.connections:
                         # Detail info is not useful. Having a more consistent interface
                         # simplifies usage of template sensors.

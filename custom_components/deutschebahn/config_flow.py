@@ -8,7 +8,7 @@ from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 
-from .const import (  # pylint: disable=unused-import
+from .const import (
     CONF_DESTINATION,
     CONF_START,
     CONF_OFFSET,
@@ -45,7 +45,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_OFFSET, default=0): cv.positive_int,
-                    vol.Required(CONF_MAX_CONNECTIONS, default=2): cv.positive_int,
+                    vol.Required(CONF_MAX_CONNECTIONS, default=2): vol.All(vol.Coerce(int), vol.Range(min=1, max=5)),
                     vol.Required(CONF_IGNORED_PRODUCTS, default=[]): cv.multi_select(CONF_IGNORED_PRODUCTS_OPTIONS),
                     vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
                     vol.Optional(CONF_UPDATE_INTERVAL, 2): cv.positive_int,
@@ -74,7 +74,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_START): cv.string,
                 vol.Required(CONF_DESTINATION): cv.string,
                 vol.Required(CONF_OFFSET, default=0): cv.positive_int,
-                vol.Required(CONF_MAX_CONNECTIONS, default=2): cv.positive_int,
+                vol.Required(CONF_MAX_CONNECTIONS, default=2): vol.All(vol.Coerce(int), vol.Range(min=1, max=5)),
                 vol.Required(CONF_IGNORED_PRODUCTS, default=[]): cv.multi_select(CONF_IGNORED_PRODUCTS_OPTIONS),
                 vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
                 vol.Optional(CONF_UPDATE_INTERVAL, 2): cv.positive_int,
