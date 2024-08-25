@@ -1,5 +1,6 @@
 {
     "name": "Deutsche Bahn",
     "render_readme": true,
-    "country": ["DE"]
+    "country": ["DE"],
+    "iot_class": "cloud_polling"
 }

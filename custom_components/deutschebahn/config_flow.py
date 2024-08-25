@@ -66,7 +66,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             await self.async_set_unique_id(user_input[CONF_START] + " to " + user_input[CONF_DESTINATION])
             self._abort_if_unique_id_configured()
-            _LOGGER.debug("Initialized new deutschebahn with id: {unique_id}")
+            _LOGGER.debug("Initialized new deutschebahn sensor with id: {unique_id}")
             return self.async_create_entry(title=user_input[CONF_START] + " - " + user_input[CONF_DESTINATION], data=user_input)
 
         data_schema = vol.Schema(
