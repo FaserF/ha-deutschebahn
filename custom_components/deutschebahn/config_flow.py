@@ -17,41 +17,10 @@ from .const import (
     CONF_IGNORED_PRODUCTS,
     CONF_IGNORED_PRODUCTS_OPTIONS,
     CONF_UPDATE_INTERVAL,
+    DOMAIN,
 )
 
-DOMAIN = "deutschebahn"
-
 _LOGGER = logging.getLogger(__name__)
-
-class OptionsFlowHandler(config_entries.OptionsFlow):
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Manage the options."""
-        def __get_option(key: str, default: Any) -> Any:
-            return self.config_entry.options.get(
-                key, self.config_entry.data.get(key, default)
-            )
-
-        if user_input is not None:
-            return self.async_create_entry(data=user_input)
-
-        return self.async_show_form(
-            step_id="init",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_OFFSET, default=0): cv.positive_int,
-                    vol.Required(CONF_MAX_CONNECTIONS, default=2): vol.All(vol.Coerce(int), vol.Range(min=1, max=6)),
-                    vol.Required(CONF_IGNORED_PRODUCTS, default=[]): cv.multi_select(CONF_IGNORED_PRODUCTS_OPTIONS),
-                    vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
-                    vol.Optional(CONF_UPDATE_INTERVAL, 2): cv.positive_int,
-                }
-            ),
-        )
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow"""
@@ -64,10 +33,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            await self.async_set_unique_id(user_input[CONF_START] + " to " + user_input[CONF_DESTINATION])
+            unique_id = user_input[CONF_START] + " to " + user_input[CONF_DESTINATION]
+            await self.async_set_unique_id(unique_id)
             self._abort_if_unique_id_configured()
-            _LOGGER.debug("Initialized new deutschebahn sensor with id: {unique_id}")
-            return self.async_create_entry(title=user_input[CONF_START] + " - " + user_input[CONF_DESTINATION], data=user_input)
+            _LOGGER.debug("Initialized new deutschebahn sensor with id: %s", unique_id)
+            return self.async_create_entry(
+                title=user_input[CONF_START] + " - " + user_input[CONF_DESTINATION], 
+                data=user_input
+            )
 
         data_schema = vol.Schema(
             {
@@ -77,7 +50,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_MAX_CONNECTIONS, default=2): vol.All(vol.Coerce(int), vol.Range(min=1, max=6)),
                 vol.Required(CONF_IGNORED_PRODUCTS, default=[]): cv.multi_select(CONF_IGNORED_PRODUCTS_OPTIONS),
                 vol.Required(CONF_ONLY_DIRECT, default=False): cv.boolean,
-                vol.Optional(CONF_UPDATE_INTERVAL, 2): cv.positive_int,
+                vol.Optional(CONF_UPDATE_INTERVAL, default=2): cv.positive_int,
             }
         )
 
@@ -94,3 +67,34 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.OptionsFlow:
         """Create the options flow."""
         return OptionsFlowHandler(config_entry)
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle an options flow"""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        # Retrieve current options values from config_entry.data
+        current_options = self.config_entry.options or self.config_entry.data
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(CONF_OFFSET, default=current_options.get(CONF_OFFSET, 0)): cv.positive_int,
+                    vol.Optional(CONF_MAX_CONNECTIONS, default=current_options.get(CONF_MAX_CONNECTIONS, 2)): vol.All(vol.Coerce(int), vol.Range(min=1, max=6)),
+                    vol.Optional(CONF_IGNORED_PRODUCTS, default=current_options.get(CONF_IGNORED_PRODUCTS, [])): cv.multi_select(CONF_IGNORED_PRODUCTS_OPTIONS),
+                    vol.Optional(CONF_ONLY_DIRECT, default=current_options.get(CONF_ONLY_DIRECT, False)): cv.boolean,
+                    vol.Optional(CONF_UPDATE_INTERVAL, default=current_options.get(CONF_UPDATE_INTERVAL, 2)): cv.positive_int,
+                }
+            ),
+        )
