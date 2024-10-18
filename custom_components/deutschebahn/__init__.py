@@ -32,8 +32,8 @@ async def async_setup_entry(
     async def async_update_data():
         """Fetch data from Schiene."""
         config = hass.data[DOMAIN][entry.entry_id]
-        update_interval = config.get("scan_interval", 2)  # Default scan interval
-        async with async_timeout.timeout(update_interval - 1):
+        update_interval = timedelta(minutes=config.get(CONF_UPDATE_INTERVAL, 2))
+        async with async_timeout.timeout(update_interval - 0.1):
             # Assuming data.update() is an async function, no need for async_add_executor_job
             await data.update()
 

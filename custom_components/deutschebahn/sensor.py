@@ -39,16 +39,14 @@ async def async_setup_entry(
     """Setup sensors from a config entry created in the integrations UI."""
     config = hass.data[DOMAIN][entry.entry_id]
     scan_interval = timedelta(minutes=config.get(CONF_UPDATE_INTERVAL, 2))
-    _LOGGER.debug("Sensor async_setup_entry")
+    _LOGGER.debug(f"Sensor async_setup_entry Using scan interval: {scan_interval}")
+
     if entry.options:
         config.update(entry.options)
+
     sensors = DeutscheBahnSensor(config, hass, scan_interval)
-    async_add_entities(
-        [
-            DeutscheBahnSensor(config, hass, scan_interval)
-        ],
-        update_before_add=True
-    )
+    async_add_entities([sensors], update_before_add=True)
+
 
 class DeutscheBahnSensor(SensorEntity):
     """Implementation of a Deutsche Bahn sensor."""
@@ -151,13 +149,13 @@ class DeutscheBahnSensor(SensorEntity):
 
                 if connections_count > 0:
                     if connections_count < self.max_connections:
+                        verb = "is" if connections_count == 1 else "are"
                         _LOGGER.warning(
-                            f"Requested {self.max_connections} connections, but only {connections_count} are available."
+                            f"{self._name} Requested {self.max_connections} connections, but only {connections_count} {verb} available."
                         )
 
+
                     for con in self.connections:
-                        # Detail info is not useful. Having a more consistent interface
-                        # simplifies usage of template sensors.
                         if "details" in con:
                             #_LOGGER.debug(f"Processing connection: {con}")
                             con.pop("details")
