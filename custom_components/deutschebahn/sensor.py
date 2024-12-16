@@ -122,17 +122,28 @@ class DeutscheBahnSensor(SensorEntity):
     async def async_added_to_hass(self):
         """Call when entity is added to hass."""
         await super().async_added_to_hass()
-        self.async_on_remove(
-            async_track_time_interval(
-                self.hass, self._async_refresh_data, self.scan_interval
-            )
+        _LOGGER.warning(
+            f"The DeutscheBahn integration is currently non-functional due to: https://github.com/FaserF/ha-deutschebahn?tab=readme-ov-file#deprecation-warning "
+            f"Please disable the integration temporarily until a fix is available."
         )
+        #self.async_on_remove(
+        #    async_track_time_interval(
+        #        self.hass, self._async_refresh_data, self.scan_interval
+        #    )
+        #)
 
     async def _async_refresh_data(self, now=None):
         """Refresh the data."""
         await self.async_update_ha_state(force_refresh=True)
 
     async def async_update(self):
+        """Skip updates and log a warning."""
+        _LOGGER.warning(
+            "Skipping update for DeutscheBahn sensor '%s' due to known issues with the data source: https://github.com/FaserF/ha-deutschebahn?tab=readme-ov-file#breaking-warning"
+            % self._name
+        )
+
+    async def async_update_disabled(self):
         try:
             with async_timeout.timeout(30):
                 hass = self.hass
