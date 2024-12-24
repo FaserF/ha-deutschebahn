@@ -1,7 +1,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 # BREAKING WARNING!!!
-Unfortunatly bahn.de has shut down their websites that this integration used for web scraping. Therefore this integration wont work anymore since 15th december 2024. [More details](https://github.com/kennell/schiene/pull/36#issuecomment-2546101589) & [here](https://github.com/FaserF/ha-deutschebahn/issues/59#issuecomment-2546087237). Until a new method has found this integration wont work anymore. There is NO ETA.
+Unfortunatly bahn.de has shut down their websites that this integration used for web scraping. Therefore this integration wont work anymore since 15th december 2024. [More details](https://github.com/kennell/schiene/pull/36#issuecomment-2546101589) & [here](https://github.com/FaserF/ha-deutschebahn/issues/59#issuecomment-2546087237). Until a new method has found this integration wont work anymore. There is NO ETA. Work is being done [here](https://github.com/FaserF/ha-deutschebahn/pull/60).
 
 I recommend switching to those integrations for now:
 
