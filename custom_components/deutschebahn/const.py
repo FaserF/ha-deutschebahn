@@ -1,7 +1,9 @@
-"""German Train System - Deutsche Bahn"""
+"""Constants for Deutsche Bahn Integration."""
 DOMAIN = "deutschebahn"
-ATTRIBUTION = "Data provided by bahn.de api"
+ATTRIBUTION = "Data provided by Deutsche Bahn API"
 
+CONF_CLIENT_ID = "client_id"
+CONF_CLIENT_SECRET = "client_secret"
 CONF_DESTINATION = "destination"
 CONF_START = "start"
 CONF_OFFSET = "offset"

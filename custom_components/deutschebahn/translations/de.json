@@ -1,41 +1,43 @@
 {
   "options": {
-    "flow_title": "Einrichtung der:{entity_name}",
+    "flow_title": "Deutsche Bahn einrichten: {entity_name}",
     "step": {
       "init": {
-        "description": "Trage hier deine Zug Station Informationen ein für die Suchabfrage.",
+        "description": "Konfigurieren Sie die Einstellungen Ihres Deutsche-Bahn-Sensors.",
         "data": {
           "offset": "Versatz in Minuten",
           "only_direct": "Nur direkte Verbindungen anzeigen?",
-          "max_connections": "Maximale Anzahl der angezeigten Verbindungen",
+          "max_connections": "Maximale Verbindungen im Sensor",
           "ignored_products": "Zu ignorierende Produkte",
-          "scan_interval": "Aktualisierungsintervall in Minuten"
+          "scan_interval": "Abtastintervall in Minuten"
         }
       }
     }
   },
   "config": {
-    "flow_title": "Einrichtung der DeutscheBahn Integration",
+    "flow_title": "Deutsche Bahn einrichten",
     "step": {
       "user": {
-        "description": "Trage hier deine Zug Station Informationen ein für die Suchabfrage.",
+        "description": "Konfigurieren Sie die Verbindungseinstellungen für Deutsche Bahn.",
         "data": {
-          "start": "Startstation",
-          "destination": "Zielstation",
+          "client_id": "Client-ID",
+          "client_secret": "Client-Secret",
+          "start": "Startbahnhof",
+          "destination": "Zielbahnhof",
           "offset": "Versatz in Minuten",
           "only_direct": "Nur direkte Verbindungen anzeigen?",
-          "max_connections": "Maximale Anzahl der angezeigten Verbindungen",
+          "max_connections": "Maximale Verbindungen im Sensor",
           "ignored_products": "Zu ignorierende Produkte",
-          "scan_interval": "Aktualisierungsintervall in Minuten"
+          "scan_interval": "Abtastintervall in Minuten"
         }
       }
     },
     "abort": {
-      "already_configured": "Diese Start & Ziel Station Kombination ist bereits konfiguriert."
+      "already_configured": "Diese Start- und Ziel-Kombination ist bereits konfiguriert."
     },
     "error": {
-      "invalid_station": "Ungültige Start/Ziel-Station",
-      "unknown": "Unbekannter Fehler"
+      "invalid_station": "Ungültiger Start- oder Zielbahnhof.",
+      "unknown": "Ein unbekannter Fehler ist aufgetreten."
     }
   }
 }

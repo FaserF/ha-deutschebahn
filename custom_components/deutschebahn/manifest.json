@@ -9,10 +9,10 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/faserf/ha-deutschebahn/issues",
   "loggers": [
-    "schiene"
+    "deutsche-bahn-api"
   ],
   "requirements": [
-    "schiene==0.26"
+    "deutsche-bahn-api==1.0.6"
   ],
-  "version": "3.0.5"
+  "version": "4.0.0"
 }

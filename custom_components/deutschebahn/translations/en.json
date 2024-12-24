@@ -1,9 +1,9 @@
 {
   "options": {
-    "flow_title": "Setup DB:{entity_name}",
+    "flow_title": "Setup Deutsche Bahn: {entity_name}",
     "step": {
       "init": {
-        "description": "Submit your train station details for the search queries.",
+        "description": "Configure your Deutsche Bahn sensor settings.",
         "data": {
           "offset": "Offset in minutes",
           "only_direct": "Only show direct connections?",
@@ -15,11 +15,13 @@
     }
   },
   "config": {
-    "flow_title": "Setup DeutscheBahn",
+    "flow_title": "Setup Deutsche Bahn",
     "step": {
       "user": {
-        "description": "Submit your train station details for the search queries.",
+        "description": "Configure your Deutsche Bahn connection settings.",
         "data": {
+          "client_id": "Client ID",
+          "client_secret": "Client Secret",
           "start": "Start station",
           "destination": "Destination station",
           "offset": "Offset in minutes",
@@ -31,11 +33,11 @@
       }
     },
     "abort": {
-      "already_configured": "This start & Destination combination is already configured"
+      "already_configured": "This start & destination combination is already configured."
     },
     "error": {
-      "invalid_station": "Invalid Start / Destination station",
-      "unknown": "Unknown Error"
+      "invalid_station": "Invalid start or destination station.",
+      "unknown": "An unknown error occurred."
     }
   }
 }
