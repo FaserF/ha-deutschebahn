@@ -1,22 +1,18 @@
-"""deutschebahn sensor platform."""
 from datetime import timedelta, datetime
 import logging
 from typing import Optional
 import async_timeout
-from urllib.parse import quote
-
-import schiene
-import homeassistant.util.dt as dt_util
-import requests
-from bs4 import BeautifulSoup
+from deutsche_bahn_api.api_authentication import ApiAuthentication
+from deutsche_bahn_api.station_helper import StationHelper
+from deutsche_bahn_api.timetable_helper import TimetableHelper
+#import deutsche_bahn_api
 
 from homeassistant import config_entries, core
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
-from homeassistant.const import ATTR_ATTRIBUTION
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.helpers.typing import ConfigType
 
 from .const import (
     ATTRIBUTION,
@@ -25,16 +21,16 @@ from .const import (
     CONF_OFFSET,
     CONF_ONLY_DIRECT,
     CONF_MAX_CONNECTIONS,
-    CONF_IGNORED_PRODUCTS,
     CONF_UPDATE_INTERVAL,
-    ATTR_DATA,
+    CONF_CLIENT_ID,
+    CONF_CLIENT_SECRET,
     DOMAIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
-    hass: core.HomeAssistant, entry: ConfigType, async_add_entities
+    hass: core.HomeAssistant, entry: ConfigType, async_add_entities: AddEntitiesCallback
 ):
     """Setup sensors from a config entry created in the integrations UI."""
     config = hass.data[DOMAIN][entry.entry_id]
@@ -62,11 +58,23 @@ class DeutscheBahnSensor(SensorEntity):
         self.goal = config[CONF_DESTINATION]
         self.offset = timedelta(minutes=config[CONF_OFFSET])
         self.max_connections: int = config.get(CONF_MAX_CONNECTIONS, 2)
-        self.ignored_products = config.get(CONF_IGNORED_PRODUCTS, [])
         self.only_direct = config[CONF_ONLY_DIRECT]
-        self.schiene = schiene.Schiene()
-        self.connections = [{}]
         self.scan_interval = scan_interval
+
+        # Initialize API authentication
+        self.api_auth = ApiAuthentication(
+            config[CONF_CLIENT_ID],
+            config[CONF_CLIENT_SECRET],
+        )
+        if not self.api_auth.test_credentials():
+            raise ValueError("Invalid Deutsche Bahn API credentials.")
+
+        # Station helpers
+        self.station_helper = StationHelper()
+        self.timetable_helper = None
+
+        # Connections
+        self.connections = []
 
     @property
     def name(self):
@@ -98,141 +106,51 @@ class DeutscheBahnSensor(SensorEntity):
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        attributes = {}
-        if self.connections:
-            for con in self.connections:
-                if "departure" in con and "arrival" in con:
-                    # Parse departure and arrival times
-                    departure_time = dt_util.parse_time(con.get("departure"))
-                    arrival_time = dt_util.parse_time(con.get("arrival"))
-                    if departure_time and arrival_time:
-                        # Create datetime objects for departure and arrival times
-                        departure_datetime = datetime.combine(datetime.now().date(), departure_time)
-                        arrival_datetime = datetime.combine(datetime.now().date(), arrival_time)
-                        # Apply delays
-                        corrected_departure_time = departure_datetime + timedelta(minutes=con.get("delay", 0))
-                        corrected_arrival_time = arrival_datetime + timedelta(minutes=con.get("delay_arrival", 0))
-                        # Format and add current departure and arrival times
-                        con["departure_current"] = corrected_departure_time.strftime("%H:%M")
-                        con["arrival_current"] = corrected_arrival_time.strftime("%H:%M")
-        attributes["departures"] = self.connections
-        attributes["last_update"] = datetime.now()
+        attributes = {
+            "departures": self.connections,
+            "last_update": datetime.now(),
+        }
         return attributes
 
     async def async_added_to_hass(self):
         """Call when entity is added to hass."""
         await super().async_added_to_hass()
-        _LOGGER.warning(
-            f"The DeutscheBahn integration is currently non-functional due to: https://github.com/FaserF/ha-deutschebahn?tab=readme-ov-file#deprecation-warning "
-            f"Please disable the integration temporarily until a fix is available."
+        self.async_on_remove(
+            async_track_time_interval(
+                self.hass, self._async_refresh_data, self.scan_interval
+            )
         )
-        #self.async_on_remove(
-        #    async_track_time_interval(
-        #        self.hass, self._async_refresh_data, self.scan_interval
-        #    )
-        #)
 
     async def _async_refresh_data(self, now=None):
         """Refresh the data."""
         await self.async_update_ha_state(force_refresh=True)
 
     async def async_update(self):
-        """Skip updates and log a warning."""
-        _LOGGER.warning(
-            "Skipping update for DeutscheBahn sensor '%s' due to known issues with the data source: https://github.com/FaserF/ha-deutschebahn?tab=readme-ov-file#breaking-warning"
-            % self._name
-        )
-
-    async def async_update_disabled(self):
         try:
             with async_timeout.timeout(30):
-                hass = self.hass
-                """Pull data from the bahn.de web page."""
-                _LOGGER.debug(f"Update the connection data for '{self.start}' '{self.goal}'")
-                self.connections = await hass.async_add_executor_job(
-                        fetch_schiene_connections, hass, self, self.ignored_products
-                    )
+                _LOGGER.debug(f"Updating data for {self.start} -> {self.goal}")
+
+                # Find stations
+                start_station = self.station_helper.find_stations_by_name(self.start)[0]
+                goal_station = self.station_helper.find_stations_by_name(self.goal)[0]
+
+                # Initialize timetable helper
+                self.timetable_helper = TimetableHelper(start_station, self.api_auth)
+
+                # Get timetable
+                raw_connections = self.timetable_helper.get_timetable()
+                self.connections = self.timetable_helper.get_timetable_changes(raw_connections)
 
                 if not self.connections:
-                    self.connections = [{}]
+                    self.connections = []
                     self._available = True
-                connections_count = len(self.connections)
 
-                if connections_count > 0:
-                    if connections_count < self.max_connections:
-                        verb = "is" if connections_count == 1 else "are"
-                        _LOGGER.warning(
-                            f"{self._name} Requested {self.max_connections} connections, but only {connections_count} {verb} available."
-                        )
+                if self.connections:
+                    first_connection = self.connections[0]
+                    departure_time = first_connection.get("departure")
+                    delay = first_connection.get("delay", 0)
+                    self._state = f"{departure_time} (+{delay})" if delay else departure_time
 
-
-                    for con in self.connections:
-                        if "details" in con:
-                            #_LOGGER.debug(f"Processing connection: {con}")
-                            con.pop("details")
-                            delay = con.get("delay", {"delay_departure": 0, "delay_arrival": 0})
-                            con["delay"] = delay["delay_departure"]
-                            con["delay_arrival"] = delay["delay_arrival"]
-                            con["ontime"] = con.get("ontime", False)
-                            #self.attrs[ATTR_DATA] = self.connections
-                            #self.attrs[ATTR_ATTRIBUTION] = f"last updated {datetime.now()} \n{ATTRIBUTION}"
-
-                    if self.connections[0].get("delay", 0) != 0:
-                        self._state = f"{self.connections[0]['departure']} + {self.connections[0]['delay']}"
-                    else:
-                        self._state = self.connections[0].get("departure", "Unknown")
-                else:
-                    _LOGGER.exception(f"Data from DB for direction: '{self.start}' '{self.goal}' was empty, retrying at next sync run. Maybe also check if you have spelled your start and destination correct?")
-                    self._available = False
-
-        except:
+        except Exception as e:
             self._available = False
-            _LOGGER.exception(f"Cannot retrieve data for direction: '{self.start}' '{self.goal}' - Most likely it is a temporary API issue from DB and will stop working after a HA restart/some time.")
-
-def fetch_schiene_connections(hass, self, ignored_products):
-    """Fetch connections from Schiene API and apply offset filter."""
-    try:
-        raw_data = self.schiene.connections(
-            self.start,
-            self.goal,
-            dt_util.as_local(dt_util.utcnow() + self.offset),
-            self.only_direct,
-        )
-        _LOGGER.debug(f"Fetched raw data: {raw_data}")
-
-        current_time = dt_util.as_local(dt_util.utcnow() + self.offset)
-        _LOGGER.debug(f"Current time with offset: {current_time}")
-
-        data = []
-        for connection in raw_data:
-            departure_time = dt_util.parse_time(connection.get("departure"))
-            if departure_time:
-                # Combine date with time, then make sure datetime is aware
-                departure_datetime = datetime.combine(datetime.now().date(), departure_time)
-                # Assume timezone is the same as current_time's timezone
-                departure_datetime = dt_util.as_local(departure_datetime)
-
-                delay_info = connection.get("delay", {"delay_departure": 0, "delay_arrival": 0})
-                delay_departure = delay_info.get("delay_departure", 0)
-                delay_arrival = delay_info.get("delay_arrival", 0)
-                departure_datetime += timedelta(minutes=delay_departure)
-                _LOGGER.debug(f"Departure datetime for connection: {departure_datetime}")
-
-                if departure_datetime < current_time:
-                    _LOGGER.debug(f"Connection filtered out, departure time {departure_datetime} is before current time {current_time}")
-                    continue
-
-            if len(data) == self.max_connections:
-                _LOGGER.debug("Reached maximum number of connections to return")
-                break
-            elif set(connection["products"]).intersection(ignored_products):
-                _LOGGER.debug(f"Connection filtered out due to ignored products: {connection['products']}")
-                continue
-
-            data.append(connection)
-
-        _LOGGER.debug(f"Filtered data: {data}")
-        return data
-    except Exception as e:
-        _LOGGER.exception(f"Error fetching or processing connections: {e}")
-        return []
+            _LOGGER.exception(f"Error updating Deutsche Bahn data: {e}")
