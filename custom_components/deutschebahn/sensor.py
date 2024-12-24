@@ -7,7 +7,6 @@ import asyncio
 from deutsche_bahn_api.api_authentication import ApiAuthentication
 from deutsche_bahn_api.station_helper import StationHelper
 from deutsche_bahn_api.timetable_helper import TimetableHelper
-#import deutsche_bahn_api
 
 from homeassistant import config_entries, core
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
@@ -119,9 +118,10 @@ class DeutscheBahnSensor(SensorEntity):
     def extra_state_attributes(self):
         """Return the state attributes."""
         attributes = {
-            "departures": self.connections,
+            "departures": self.connections if self.connections else "No connections found",
             "last_update": datetime.now(),
         }
+        _LOGGER.debug(f"Extra state attributes: {attributes}")
         return attributes
 
     async def async_added_to_hass(self):
@@ -156,6 +156,7 @@ class DeutscheBahnSensor(SensorEntity):
                 if not self.connections:
                     self.connections = []
                     self._available = True
+                    self._state = "No connections available"
 
                 if self.connections:
                     # Log the first connection to inspect its structure
@@ -168,9 +169,11 @@ class DeutscheBahnSensor(SensorEntity):
                         departure_time = first_connection.departure
                         delay = getattr(first_connection, "delay", 0)
                         self._state = f"{departure_time} (+{delay})" if delay else departure_time
+                        _LOGGER.debug(f"Set state: {self._state}")
                     else:
                         _LOGGER.error(f"First connection does not have the expected attributes: {first_connection}")
 
         except Exception as e:
             self._available = False
+            self._state = "Error retrieving data"
             _LOGGER.exception(f"Error updating Deutsche Bahn data: {e}")
