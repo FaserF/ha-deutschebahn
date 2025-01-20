@@ -139,7 +139,7 @@ class DeutscheBahnSensor(SensorEntity):
     async def async_update(self):
         """Skip updates and log a warning."""
         _LOGGER.warning(
-            "Skipping update for DeutscheBahn sensor '%s' due to known issues with the data source: https://github.com/FaserF/ha-deutschebahn?tab=readme-ov-file#breaking-warning"
+            "Skipping update for DeutscheBahn sensor '%s'. Please switch to superior integration: https://github.com/FaserF/ha-db_infoscreen"
             % self._name
         )
 

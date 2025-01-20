@@ -3,7 +3,7 @@
     "flow_title": "Einrichtung der:{entity_name}",
     "step": {
       "init": {
-        "description": "Trage hier deine Zug Station Informationen ein für die Suchabfrage.",
+        "description": "Bitte wechsle zu dieser Integration: https://github.com/FaserF/ha-db_infoscreen",
         "data": {
           "offset": "Versatz in Minuten",
           "only_direct": "Nur direkte Verbindungen anzeigen?",
@@ -18,7 +18,7 @@
     "flow_title": "Einrichtung der DeutscheBahn Integration",
     "step": {
       "user": {
-        "description": "Trage hier deine Zug Station Informationen ein für die Suchabfrage.",
+        "description": "Bitte wechsle zu dieser Integration: https://github.com/FaserF/ha-db_infoscreen",
         "data": {
           "start": "Startstation",
           "destination": "Zielstation",
