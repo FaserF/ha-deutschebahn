@@ -1,14 +1,12 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
+# SUPERSEDED INFORMATION!
+[superior integration](https://github.com/FaserF/ha-db_infoscreen) has been released which brings similar functionality from a different and more reliable api source. 
+
 # BREAKING WARNING!!!
-Unfortunatly bahn.de has shut down their websites that this integration used for web scraping. Therefore this integration wont work anymore since 15th december 2024. [More details](https://github.com/kennell/schiene/pull/36#issuecomment-2546101589) & [here](https://github.com/FaserF/ha-deutschebahn/issues/59#issuecomment-2546087237). Until a new method has found this integration wont work anymore. There is NO ETA. Work is being done [here](https://github.com/FaserF/ha-deutschebahn/pull/60).
+Obsolete due to [superior integration](https://github.com/FaserF/ha-db_infoscreen).
 
-I recommend switching to those integrations for now:
-
-- [hacs-hafas by @klimnik](https://github.com/akloeckner/hacs-hafas)
-
-- [MVG (for Munich) by @danielpotthast](https://github.com/danielpotthast/mvg)
-
+Unfortunatly bahn.de has shut down their websites that this integration used for web scraping. Therefore this integration wont work anymore since 15th december 2024. [More details](https://github.com/kennell/schiene/pull/36#issuecomment-2546101589) & [here](https://github.com/FaserF/ha-deutschebahn/issues/59#issuecomment-2546087237).
 
 # Deutsche Bahn Homeassistant Sensor
 The `deutschebahn` sensor will give you the departure time of the next train for the given connection. In case of a delay, the delay is also shown. Additional details are used to inform about, e.g., the type of the train, price, and if it is on time.
